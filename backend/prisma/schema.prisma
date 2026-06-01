@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStage {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  passwordHash String?
+  avatarUrl    String?
+  provider     String        @default("credentials")
+  googleId     String?       @unique
+  githubId     String?       @unique
+  resetPasswordTokenHash String?
+  resetPasswordExpires   DateTime?
+  role         String        @default("USER")
+  tasks        Task[]
+  activities   ActivityLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([email])
+}
+
+model Task {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  stage       TaskStage     @default(TODO)
+  priority    TaskPriority  @default(MEDIUM)
+  dueDate     DateTime?
+  tags        String[]      @default([])
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities  ActivityLog[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([userId, stage])
+  @@index([userId, priority])
+  @@index([userId, dueDate])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([taskId, createdAt])
+}

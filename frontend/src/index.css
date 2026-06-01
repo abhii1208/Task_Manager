@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg-main: #f8f7ff;
+  --page-bg: #f7f5ff;
+  --surface: #ffffff;
+  --surface-soft: #f4f0ff;
+  --surface-soft-2: #eeeafe;
+  --border: #d8d2eb;
+  --soft-border: #e7e2f3;
+  --text-main: #111827;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --primary: #3323cc;
+  --primary-hover: #2416a8;
+  --primary-soft: #eeeafe;
+  --brand: #3323cc;
+  --brand-hover: #2416a8;
+  --brand-soft: #eeeafe;
+  --brand-soft-bg: #f4f0ff;
+  --violet-border: #d8d2eb;
+  --success: #16a34a;
+  --success-hover: #15803d;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--page-bg);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c0d8;
+  border-radius: 999px;
+}
+
+.input-base {
+  @apply h-12 w-full rounded-xl border bg-white px-4 text-base text-slate-900 outline-none transition duration-200 ease-premium placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-indigo-100;
+  border-color: var(--violet-border);
+}
+
+.label-base {
+  @apply mb-2 block text-[12px] font-bold uppercase tracking-[0.08em];
+  color: var(--text-secondary);
+}
+
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--violet-border);
+  border-radius: 1.1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 14px 30px rgba(51, 35, 204, 0.08);
+}
+
+.glass,
+.glass-panel {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 8px 28px rgba(18, 15, 105, 0.3);
+}
+
+.heading-font {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.page-container {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6;
+}
