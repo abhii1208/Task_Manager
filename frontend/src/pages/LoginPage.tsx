@@ -70,7 +70,7 @@ export const LoginPage = () => {
       console.log("Login target:", `${import.meta.env.VITE_API_BASE_URL}/auth/login`);
       await login(values);
       toast.success("Welcome back");
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // eslint-disable-next-line no-console
@@ -153,7 +153,7 @@ export const LoginPage = () => {
             <PasswordInput label={undefined} placeholder="********" error={errors.password?.message} {...register("password")} />
           </div>
 
-          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting} loadingText="Logging in...">
+          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting} loadingText="Signing in...">
             Continue to Workspace
           </Button>
         </motion.form>

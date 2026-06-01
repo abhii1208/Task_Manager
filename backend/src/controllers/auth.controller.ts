@@ -138,12 +138,24 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   });
 
   const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
-  await sendPasswordResetEmail(user.email, resetUrl, user.name);
 
   res.status(200).json({
     success: true,
     message: forgotPasswordMessage,
     data: null
+  });
+
+  setImmediate(() => {
+    void (async () => {
+      try {
+        await sendPasswordResetEmail(user.email, resetUrl, user.name);
+        // eslint-disable-next-line no-console
+        console.log("[Email] Password reset email sent", { userId: user.id });
+      } catch (emailError) {
+        // eslint-disable-next-line no-console
+        console.error("[Email] Password reset email failed", emailError);
+      }
+    })();
   });
 });
 

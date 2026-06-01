@@ -27,9 +27,9 @@ type NavItem = {
 };
 
 const navigationItems: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/tasks/kanban", label: "Board", icon: ListChecks },
-  { to: "/tasks/list", label: "List View", icon: Users },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/board", label: "Board", icon: ListChecks },
+  { to: "/list", label: "List View", icon: Users },
   { to: "/settings", label: "Settings", icon: Settings }
 ];
 

@@ -12,11 +12,13 @@ type AuthContextValue = {
   token: string | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
+  authError: string | null;
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   handleOAuthToken: (token: string) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
+  retryAuthCheck: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -26,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const saveSession = useCallback((nextToken: string, nextUser: User): void => {
     setToken(nextToken);
@@ -33,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSessionToken(nextToken);
     setUser(nextUser);
     setIsAuthenticated(true);
+    setAuthError(null);
   }, []);
 
   const clearSession = useCallback(() => {
@@ -41,13 +45,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSessionToken(null);
     setUser(null);
     setIsAuthenticated(false);
+    setAuthError(null);
   }, []);
 
   const refreshProfile = useCallback(async (): Promise<void> => {
     const profile = await authService.me();
     setUser(profile);
     setIsAuthenticated(true);
+    setAuthError(null);
   }, []);
+
+  const runSessionHydration = useCallback(
+    async (sessionToken: string, showTimeoutToast = false): Promise<void> => {
+      setAuthHeader(sessionToken);
+
+      const hydrationTimeout = new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error("AUTH_CHECK_TIMEOUT")), 5000);
+      });
+
+      try {
+        await Promise.race([refreshProfile(), hydrationTimeout]);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          clearSession();
+          return;
+        }
+
+        if (error instanceof Error && error.message === "AUTH_CHECK_TIMEOUT") {
+          setAuthError("Starting workspace services... Please retry in a few seconds.");
+          if (showTimeoutToast) {
+            toast.error("Starting workspace services... Please retry in a few seconds.");
+          }
+        } else {
+          setAuthError("Unable to verify your session right now. Please retry.");
+        }
+
+        setIsAuthenticated(false);
+      }
+    },
+    [clearSession, refreshProfile]
+  );
 
   const login = useCallback(
     async (payload: LoginPayload) => {
@@ -87,6 +124,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearSession();
   }, [clearSession]);
 
+  const retryAuthCheck = useCallback(async (): Promise<void> => {
+    if (!token) {
+      setIsAuthLoading(false);
+      setIsAuthenticated(false);
+      setAuthError(null);
+      return;
+    }
+
+    setIsAuthLoading(true);
+    setAuthError(null);
+    await runSessionHydration(token, true);
+    setIsAuthLoading(false);
+  }, [runSessionHydration, token]);
+
   useEffect(() => {
     const handleSessionExpired = (): void => {
       clearSession();
@@ -109,26 +160,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      setAuthHeader(token);
-
-      const hydrationTimeout = new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error("AUTH_CHECK_TIMEOUT")), 8000);
-      });
-
-      try {
-        await Promise.race([refreshProfile(), hydrationTimeout]);
-      } catch (error) {
-        clearSession();
-        if (error instanceof Error && error.message === "AUTH_CHECK_TIMEOUT") {
-          toast.error("Session check timed out. Please login again.");
-        }
-      } finally {
-        setIsAuthLoading(false);
-      }
+      await runSessionHydration(token);
+      setIsAuthLoading(false);
     };
 
     void hydrateUser();
-  }, [token, clearSession, refreshProfile]);
+  }, [runSessionHydration, token]);
 
   const value = useMemo(
     () => ({
@@ -136,13 +173,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       token,
       isAuthenticated,
       isAuthLoading,
+      authError,
       login,
       register,
       handleOAuthToken,
       logout,
-      refreshProfile
+      refreshProfile,
+      retryAuthCheck
     }),
-    [user, token, isAuthenticated, isAuthLoading, login, register, handleOAuthToken, logout, refreshProfile]
+    [user, token, isAuthenticated, isAuthLoading, authError, login, register, handleOAuthToken, logout, refreshProfile, retryAuthCheck]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

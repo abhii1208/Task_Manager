@@ -7,7 +7,7 @@ export const NotFoundPage = () => {
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-text-muted">404</p>
         <h1 className="mt-2 text-2xl font-bold text-text-main">Page not found</h1>
         <p className="mt-2 text-sm text-text-secondary">The page you requested does not exist.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover">
+        <Link to="/dashboard" className="mt-6 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover">
           Go to dashboard
         </Link>
       </div>

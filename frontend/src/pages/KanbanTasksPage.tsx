@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { PageTransition } from "../components/common/PageTransition";
+import { BoardSkeleton } from "../components/common/BoardSkeleton";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/common/ErrorState";
-import { Skeleton } from "../components/ui/Skeleton";
 import { KanbanBoard } from "../components/tasks/KanbanBoard";
 import { TaskFilters } from "../components/tasks/TaskFilters";
 import { TaskModal } from "../components/tasks/TaskModal";
@@ -167,11 +167,7 @@ export const KanbanTasksPage = () => {
 
           <div className="p-4 sm:p-6">
             {isLoading ? (
-              <div className="flex gap-4 overflow-x-auto">
-                <Skeleton className="h-[400px] w-[90vw] shrink-0 sm:w-[340px] lg:w-full" />
-                <Skeleton className="h-[400px] w-[90vw] shrink-0 sm:w-[340px] lg:w-full" />
-                <Skeleton className="h-[400px] w-[90vw] shrink-0 sm:w-[340px] lg:w-full" />
-              </div>
+              <BoardSkeleton />
             ) : tasks.length ? (
               <KanbanBoard
                 tasks={tasks}

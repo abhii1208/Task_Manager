@@ -3,6 +3,7 @@ import { ReactNode, useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { ErrorState } from "../components/common/ErrorState";
+import { DashboardSkeleton } from "../components/common/DashboardSkeleton";
 import { PageTransition } from "../components/common/PageTransition";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { Button } from "../components/ui/Button";
@@ -108,6 +109,7 @@ export const DashboardPage = () => {
   };
 
   const completionRateLabel = useMemo(() => `${summary?.completionRate ?? 0}%`, [summary?.completionRate]);
+  const showInitialSkeleton = isLoading && isSummaryLoading && isActivityLoading && tasks.length === 0;
 
   return (
     <AppLayout
@@ -119,6 +121,8 @@ export const DashboardPage = () => {
     >
       <PageTransition>
         {error ? <ErrorState message={error} onAction={() => void refreshAll()} /> : null}
+
+        {showInitialSkeleton ? <DashboardSkeleton /> : null}
 
         <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total Tasks" value={summary?.totalTasks ?? 0} icon={<ListTodo size={16} />} isLoading={isSummaryLoading} />

@@ -1,7 +1,9 @@
 import { AnimatePresence } from "framer-motion";
+import { Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AuthRedirectRoute } from "./components/common/AuthRedirectRoute";
+import { FullPageLoader } from "./components/common/FullPageLoader";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -21,9 +23,12 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/tasks/kanban" element={<KanbanTasksPage />} />
-          <Route path="/tasks/list" element={<ListViewPage />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/board" element={<KanbanTasksPage />} />
+          <Route path="/list" element={<ListViewPage />} />
+          <Route path="/tasks/kanban" element={<Navigate to="/board" replace />} />
+          <Route path="/tasks/list" element={<Navigate to="/list" replace />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
@@ -45,7 +50,9 @@ const AnimatedRoutes = () => {
 const App = () => {
   return (
     <BrowserRouter>
-      <AnimatedRoutes />
+      <Suspense fallback={<FullPageLoader message="Loading workspace..." />}>
+        <AnimatedRoutes />
+      </Suspense>
     </BrowserRouter>
   );
 };

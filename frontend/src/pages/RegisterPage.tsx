@@ -61,7 +61,7 @@ export const RegisterPage = () => {
         password: values.password
       });
       toast.success("Account created");
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Registration failed");
     }

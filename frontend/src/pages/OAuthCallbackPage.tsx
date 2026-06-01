@@ -31,7 +31,7 @@ export const OAuthCallbackPage = () => {
     const token = tokenFromQuery ?? sessionStorage.getItem(OAUTH_TOKEN_CACHE_KEY);
 
     if (!token) {
-      const message = "OAuth login failed. Please try again.";
+      const message = "OAuth session expired. Please login again.";
       setError(message);
       toast.error(message);
       return;
@@ -41,7 +41,7 @@ export const OAuthCallbackPage = () => {
       try {
         await handleOAuthToken(token);
         sessionStorage.removeItem(OAUTH_TOKEN_CACHE_KEY);
-        navigate("/", { replace: true });
+        navigate("/dashboard", { replace: true });
       } catch {
         sessionStorage.removeItem(OAUTH_TOKEN_CACHE_KEY);
         const message = "Login succeeded, but profile loading failed. Please try again.";

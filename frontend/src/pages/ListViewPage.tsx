@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { PageTransition } from "../components/common/PageTransition";
+import { ListSkeleton } from "../components/common/ListSkeleton";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { ErrorState } from "../components/common/ErrorState";
-import { Skeleton } from "../components/ui/Skeleton";
 import { TaskFilters } from "../components/tasks/TaskFilters";
 import { TaskList } from "../components/tasks/TaskList";
 import { TaskModal } from "../components/tasks/TaskModal";
@@ -120,11 +120,7 @@ export const ListViewPage = () => {
 
           <div className="p-4 sm:p-6">
             {isLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-24" />
-                <Skeleton className="h-24" />
-                <Skeleton className="h-24" />
-              </div>
+              <ListSkeleton />
             ) : (
               <TaskList
                 tasks={tasks}
