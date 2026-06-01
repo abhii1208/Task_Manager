@@ -64,6 +64,20 @@ export const RegisterPage = () => {
     }
   });
 
+  const handleGoogleLogin = (): void => {
+    if (!GOOGLE_OAUTH_URL) {
+      toast.error("API URL is not configured.");
+      return;
+    }
+
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.info("Google OAuth URL:", GOOGLE_OAUTH_URL);
+    }
+
+    window.location.assign(GOOGLE_OAUTH_URL);
+  };
+
   return (
     <AuthLayout title="Create your account" subtitle="Set up your workspace in less than a minute.">
       <AuthCard>
@@ -106,7 +120,7 @@ export const RegisterPage = () => {
           <div className="h-px flex-1 bg-violet-border" />
         </div>
 
-        <Button type="button" variant="secondary" className="w-full gap-2" onClick={() => window.location.assign(GOOGLE_OAUTH_URL)}>
+        <Button type="button" variant="secondary" className="w-full gap-2" onClick={handleGoogleLogin}>
           <Chrome size={16} />
           Continue with Google
         </Button>

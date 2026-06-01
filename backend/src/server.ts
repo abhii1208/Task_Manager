@@ -18,11 +18,32 @@ const app = express();
 app.set("trust proxy", 1);
 initializePassport();
 
+const allowedOrigins = new Set(
+  [
+    env.CLIENT_URL,
+    ...env.CLIENT_URLS,
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ].filter(Boolean)
+);
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    // eslint-disable-next-line no-console
+    console.error(`[CORS] Blocked origin: ${origin}`);
+    callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  credentials: true
+};
+
+app.options("*", cors(corsOptions));
 app.use(
-  cors({
-    origin: env.CLIENT_URL,
-    credentials: true
-  })
+  cors(corsOptions)
 );
 app.use(helmet());
 app.use(
@@ -67,12 +88,15 @@ app.get("/api/health", async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
+      success: true,
       status: "ok",
       service: "TaskFlow Pro API",
+      message: "TaskFlow Pro API is running",
       database: "connected"
     });
   } catch {
     res.status(503).json({
+      success: false,
       status: "error",
       service: "TaskFlow Pro API",
       database: "disconnected",

@@ -19,6 +19,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default("7d"),
   BACKEND_URL: z.string().url().default("http://localhost:5000"),
   CLIENT_URL: z.string().url().default("http://localhost:5173"),
+  CLIENT_URLS: z.string().trim().optional(),
   GOOGLE_CLIENT_ID: z.string().trim().optional(),
   GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
   GOOGLE_CALLBACK_URL: z.string().url().optional(),
@@ -37,6 +38,19 @@ const envSchema = z.object({
 const sanitizeOptional = (value?: string): string | undefined => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+};
+
+const parseOptionalUrlList = (value?: string): string[] => {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  return trimmed
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
 };
 
 const buildDatabaseUrlFromParts = (values: {
@@ -116,6 +130,7 @@ const smtpUser = sanitizeOptional(rawEnv.SMTP_USER);
 const smtpPass = sanitizeOptional(rawEnv.SMTP_PASS);
 const smtpFrom = sanitizeOptional(rawEnv.SMTP_FROM);
 const smtpSecure = rawEnv.SMTP_SECURE ?? false;
+const clientUrls = parseOptionalUrlList(rawEnv.CLIENT_URLS);
 
 const googleCallbackUrl = rawEnv.GOOGLE_CALLBACK_URL ?? `${rawEnv.BACKEND_URL}/api/auth/google/callback`;
 
@@ -131,5 +146,6 @@ export const env = {
   SMTP_SECURE: smtpSecure,
   SMTP_USER: smtpUser,
   SMTP_PASS: smtpPass,
-  SMTP_FROM: smtpFrom
+  SMTP_FROM: smtpFrom,
+  CLIENT_URLS: clientUrls
 };

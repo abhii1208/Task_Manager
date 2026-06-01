@@ -1,8 +1,61 @@
 import { TaskPriority, TaskSortBy, TaskStage } from "../types/task";
 
 export const TOKEN_STORAGE_KEY = "tm_token";
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api").replace(/\/$/, "");
-export const GOOGLE_OAUTH_URL = `${API_BASE_URL}/auth/google`;
+
+const normalizeApiBaseUrl = (rawBaseUrl: string): string => {
+  const withoutTrailingSlash = rawBaseUrl.replace(/\/+$/, "");
+
+  if (!withoutTrailingSlash) {
+    return withoutTrailingSlash;
+  }
+
+  if (withoutTrailingSlash.endsWith("/api")) {
+    return withoutTrailingSlash;
+  }
+
+  if (withoutTrailingSlash.startsWith("http://") || withoutTrailingSlash.startsWith("https://") || withoutTrailingSlash.startsWith("/")) {
+    return `${withoutTrailingSlash}/api`;
+  }
+
+  return withoutTrailingSlash;
+};
+
+const resolveApiBaseUrl = (): string => {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+  if (configuredBaseUrl) {
+    const normalizedApiBaseUrl = normalizeApiBaseUrl(configuredBaseUrl);
+
+    if (import.meta.env.DEV && normalizedApiBaseUrl !== configuredBaseUrl.replace(/\/+$/, "")) {
+      // eslint-disable-next-line no-console
+      console.info("[API] Normalized VITE_API_BASE_URL to include /api", {
+        original: configuredBaseUrl,
+        normalized: normalizedApiBaseUrl
+      });
+    }
+
+    return normalizedApiBaseUrl;
+  }
+
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+
+    if (isLocalHost) {
+      return "http://localhost:5000/api";
+    }
+  }
+
+  // eslint-disable-next-line no-console
+  console.error(
+    "VITE_API_BASE_URL is missing. Set it to your deployed backend URL including /api (example: https://your-backend.onrender.com/api)."
+  );
+
+  return "";
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
+export const GOOGLE_OAUTH_URL = API_BASE_URL ? `${API_BASE_URL}/auth/google` : "";
 
 export const STAGES = ["TODO", "IN_PROGRESS", "DONE"] as const;
 export const PRIORITIES = ["LOW", "MEDIUM", "HIGH"] as const;
