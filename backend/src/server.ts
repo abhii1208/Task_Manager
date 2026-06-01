@@ -3,7 +3,6 @@ import express from "express";
 import type { Request, Response } from "express";
 import type { CorsOptions } from "cors";
 import rateLimit from "express-rate-limit";
-import session from "express-session";
 import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
@@ -58,21 +57,7 @@ app.use(
 app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  session({
-    secret: env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: env.NODE_ENV === "production",
-      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
-      httpOnly: true,
-      maxAge: 10 * 60 * 1000
-    }
-  })
-);
 app.use(passport.initialize());
-app.use(passport.session());
 
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

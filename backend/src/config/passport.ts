@@ -2,20 +2,7 @@ import passport from "passport";
 import { Profile as GoogleProfile, Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import { env } from "./env";
-import { prisma } from "./prisma";
 import { resolveGoogleOAuthUser } from "../services/oauth.service";
-
-type SessionUser = {
-  id: string;
-  email: string;
-  role: string;
-};
-
-const toSessionUser = (user: { id: string; email: string; role: string }): SessionUser => ({
-  id: user.id,
-  email: user.email,
-  role: user.role
-});
 
 const googleConfigured = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.GOOGLE_CALLBACK_URL);
 
@@ -32,32 +19,6 @@ export const initializePassport = (): void => {
   if (isInitialized) {
     return;
   }
-
-  passport.serializeUser((user, done) => {
-    done(null, (user as SessionUser).id);
-  });
-
-  passport.deserializeUser(async (id: string, done) => {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          email: true,
-          role: true
-        }
-      });
-
-      if (!user) {
-        done(null, false);
-        return;
-      }
-
-      done(null, toSessionUser(user));
-    } catch (error) {
-      done(error as Error);
-    }
-  });
 
   if (googleConfigured) {
     logOAuth("Google strategy initialized", { callbackURL: env.GOOGLE_CALLBACK_URL });
@@ -87,7 +48,11 @@ export const initializePassport = (): void => {
               avatarUrl: profile.photos?.[0]?.value
             });
 
-            done(null, toSessionUser(user));
+            done(null, {
+              id: user.id,
+              email: user.email,
+              role: user.role
+            });
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error("[OAuth][Google] Strategy callback failed", error);

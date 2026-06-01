@@ -22,21 +22,8 @@ const userSelect = {
   updatedAt: true
 };
 
-type OAuthRequestUser = {
-  id: string;
-  email: string;
-  role: string;
-};
-
 const oauthErrorRedirectUrl = `${env.CLIENT_URL}/login?oauthError=google`;
 const forgotPasswordMessage = "If an account exists with this email, a reset link has been sent.";
-
-const logOAuth = (message: string, details?: Record<string, unknown>): void => {
-  // eslint-disable-next-line no-console
-  console.info(
-    `[OAuth][Google] ${message}${details ? ` ${JSON.stringify(details)}` : ""}`
-  );
-};
 
 const createResetToken = (): { rawToken: string; tokenHash: string; expiresAt: Date } => {
   const rawToken = crypto.randomBytes(32).toString("hex");
@@ -44,16 +31,6 @@ const createResetToken = (): { rawToken: string; tokenHash: string; expiresAt: D
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
   return { rawToken, tokenHash, expiresAt };
-};
-
-const clearPassportSession = (req: Request): void => {
-  if (typeof req.logout === "function") {
-    req.logout(() => undefined);
-  }
-
-  if (req.session) {
-    req.session.destroy(() => undefined);
-  }
 };
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
@@ -208,33 +185,6 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
     message: "Password reset successfully. Please login.",
     data: null
   });
-});
-
-export const oauthSuccess = asyncHandler(async (req: Request, res: Response) => {
-  const oauthUser = req.user as OAuthRequestUser | undefined;
-
-  if (!oauthUser?.id || !oauthUser.email || !oauthUser.role) {
-    // eslint-disable-next-line no-console
-    console.error("[OAuth][Google] oauthSuccess received invalid req.user payload");
-    clearPassportSession(req);
-    res.redirect(oauthErrorRedirectUrl);
-    return;
-  }
-
-  const token = signToken({
-    id: oauthUser.id,
-    email: oauthUser.email,
-    role: oauthUser.role
-  });
-  logOAuth("JWT generated", { userId: oauthUser.id });
-
-  clearPassportSession(req);
-
-  const redirectUrl = new URL("/oauth/callback", env.CLIENT_URL);
-  redirectUrl.searchParams.set("token", token);
-  logOAuth("Redirecting to frontend callback", { redirectPath: redirectUrl.origin + redirectUrl.pathname });
-
-  res.redirect(302, redirectUrl.toString());
 });
 
 export const oauthFailure = (_req: Request, res: Response): void => {
