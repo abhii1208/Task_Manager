@@ -1,18 +1,19 @@
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { FullPageLoader } from "../components/ui/FullPageLoader";
 import { useAuth } from "../hooks/useAuth";
 import { authService } from "../services/auth.service";
-import { setApiAuthToken } from "../services/api";
+import { clearApiAuthToken, setApiAuthToken } from "../services/api";
 import { OAUTH_REFRESH_FLAG } from "../utils/authRefreshFlags";
 import { authToken } from "../utils/authToken";
 
 export const OAuthCallbackPage = () => {
   const { applySession } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const hasProcessed = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,22 +24,22 @@ export const OAuthCallbackPage = () => {
 
     hasProcessed.current = true;
 
-    const params = new URLSearchParams(location.search);
-    const token = params.get("token");
-
-    if (!token) {
-      const message = "OAuth session expired. Please login again.";
-      setError(message);
-      toast.error(message);
-      return;
-    }
-
     const runOAuthSession = async (): Promise<void> => {
       try {
+        const token = searchParams.get("token");
+
+        if (!token) {
+          const message = "OAuth token is missing. Please login again.";
+          setError(message);
+          toast.error(message);
+          return;
+        }
+
         authToken.set(token);
         setApiAuthToken(token);
-        const profile = await authService.me();
-        applySession(token, profile);
+        const user = await authService.me();
+        applySession(token, user);
+        toast.success("Google login successful");
         navigate("/dashboard", { replace: true });
 
         if (!sessionStorage.getItem(OAUTH_REFRESH_FLAG)) {
@@ -48,18 +49,27 @@ export const OAuthCallbackPage = () => {
             window.location.reload();
           }, 250);
         }
-      } catch {
-        const message = "Login succeeded, but profile loading failed. Please try again.";
+      } catch (caughtError) {
+        if (axios.isAxiosError(caughtError) && caughtError.response?.status === 401) {
+          authToken.clear();
+          clearApiAuthToken();
+          const message = "OAuth session expired. Please login again.";
+          setError(message);
+          toast.error(message);
+          return;
+        }
+
+        const message = "Could not complete Google login. Please retry.";
         setError(message);
         toast.error(message);
       }
     };
 
     void runOAuthSession();
-  }, [applySession, location.search, navigate]);
+  }, [applySession, navigate, searchParams]);
 
   if (!error) {
-    return <FullPageLoader message="Signing you in..." />;
+    return <FullPageLoader message="Signing you in with Google..." />;
   }
 
   return (

@@ -11,7 +11,6 @@ import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema,
 import { signToken } from "../utils/jwt";
 
 const authRouter = Router();
-const oauthFailurePath = `${env.CLIENT_URL}/#/login?oauthError=google`;
 
 const logOAuth = (message: string, details?: Record<string, unknown>): void => {
   // eslint-disable-next-line no-console
@@ -46,23 +45,18 @@ const ensureGoogleOAuthEnabled = (_req: Request, res: Response, next: NextFuncti
 };
 
 const ensureSmtpTestAccess = (req: Request, res: Response, next: NextFunction): void => {
-  if (env.NODE_ENV !== "production") {
-    next();
-    return;
-  }
-
-  if (!env.SMTP_TEST_SECRET) {
+  if (!env.TEST_SECRET) {
     res.status(503).json({
       success: false,
-      message: "SMTP test endpoint is disabled in production.",
-      error: "SMTP_TEST_SECRET is not configured."
+      message: "SMTP test endpoint is disabled.",
+      error: "TEST_SECRET is not configured."
     });
     return;
   }
 
   const testSecret = req.header("x-test-secret");
 
-  if (testSecret !== env.SMTP_TEST_SECRET) {
+  if (testSecret !== env.TEST_SECRET) {
     res.status(403).json({
       success: false,
       message: "Forbidden",
@@ -94,18 +88,19 @@ authRouter.get(
   ensureGoogleOAuthEnabled,
   (req: Request, res: Response, next: NextFunction) => {
     logOAuth("Google OAuth callback reached", { path: req.originalUrl });
+    const failureUrl = `${env.CLIENT_URL}/#/login?oauthError=google`;
+
     passport.authenticate(
       "google",
       {
-        session: false,
-        failureRedirect: oauthFailurePath
+        session: false
       },
       async (error: unknown, user?: unknown) => {
         try {
           if (error || !user) {
             // eslint-disable-next-line no-console
             console.error("[OAuth][Google] Callback failed", error);
-            res.redirect(oauthFailurePath);
+            res.redirect(failureUrl);
             return;
           }
 
@@ -114,7 +109,7 @@ authRouter.get(
           if (!oauthUser.id || !oauthUser.email || !oauthUser.role) {
             // eslint-disable-next-line no-console
             console.error("[OAuth][Google] Callback returned invalid user payload");
-            res.redirect(oauthFailurePath);
+            res.redirect(failureUrl);
             return;
           }
 
@@ -126,7 +121,7 @@ authRouter.get(
 
           logOAuth("JWT generated", { userId: oauthUser.id });
 
-          const redirectUrl = `${env.CLIENT_URL}/#/oauth/callback?token=${encodeURIComponent(token)}`;
+          const redirectUrl = `${env.CLIENT_URL}/#/oauth/callback?token=${token}`;
 
           logOAuth("Redirecting to frontend callback", {
             redirectPath: `${env.CLIENT_URL}/#/oauth/callback`
@@ -136,7 +131,7 @@ authRouter.get(
         } catch (callbackError) {
           // eslint-disable-next-line no-console
           console.error("[OAuth][Google] JWT redirect failed", callbackError);
-          res.redirect(oauthFailurePath);
+          res.redirect(failureUrl);
         }
       }
     )(req, res, next);

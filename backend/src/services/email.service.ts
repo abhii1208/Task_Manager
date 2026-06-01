@@ -1,4 +1,4 @@
-import { createMailTransporter, getSmtpFromAddress } from "../config/mail";
+import { createMailTransporter, getSmtpFromAddress, isSmtpConfigured } from "../config/mail";
 
 const createPasswordResetHtml = (name: string, resetUrl: string): string => {
   return `
@@ -42,6 +42,8 @@ const createPasswordResetText = (name: string, resetUrl: string): string => {
 
 export const sendPasswordResetEmail = async (to: string, resetUrl: string, name = "there"): Promise<void> => {
   try {
+    // eslint-disable-next-line no-console
+    console.log("[SMTP] Configured:", isSmtpConfigured());
     const transporter = createMailTransporter();
     const from = getSmtpFromAddress();
 
@@ -59,13 +61,16 @@ export const sendPasswordResetEmail = async (to: string, resetUrl: string, name 
     // eslint-disable-next-line no-console
     console.log("[SMTP] Reset email sent", { messageId: info.messageId });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown SMTP error";
-    throw new Error(`Failed to send password reset email: ${message}`);
+    // eslint-disable-next-line no-console
+    console.error("[SMTP] Reset email failed", error instanceof Error ? error.message : error);
+    throw new Error("Failed to send password reset email.");
   }
 };
 
 export const sendSmtpTestEmail = async (to: string): Promise<void> => {
   try {
+    // eslint-disable-next-line no-console
+    console.log("[SMTP] Configured:", isSmtpConfigured());
     const transporter = createMailTransporter();
     const from = getSmtpFromAddress();
 
@@ -82,7 +87,8 @@ export const sendSmtpTestEmail = async (to: string): Promise<void> => {
     // eslint-disable-next-line no-console
     console.log("[SMTP] SMTP test email sent", { messageId: info.messageId });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown SMTP error";
-    throw new Error(`Failed to send SMTP test email: ${message}`);
+    // eslint-disable-next-line no-console
+    console.error("[SMTP] SMTP test email failed", error instanceof Error ? error.message : error);
+    throw new Error("Failed to send SMTP test email.");
   }
 };
