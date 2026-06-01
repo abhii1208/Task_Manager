@@ -32,7 +32,8 @@ const envSchema = z.object({
     .transform((value) => value === "true"),
   SMTP_USER: z.string().trim().optional(),
   SMTP_PASS: z.string().trim().optional(),
-  SMTP_FROM: z.string().trim().optional()
+  SMTP_FROM: z.string().trim().optional(),
+  SMTP_TEST_SECRET: z.string().trim().optional()
 });
 
 const stripWrappingQuotes = (value: string): string => {
@@ -158,6 +159,7 @@ const smtpHost = sanitizeOptional(rawEnv.SMTP_HOST);
 const smtpUser = sanitizeOptional(rawEnv.SMTP_USER);
 const smtpPass = normalizeSmtpPass(rawEnv.SMTP_PASS);
 const smtpFrom = normalizeSmtpFrom(rawEnv.SMTP_FROM);
+const smtpTestSecret = sanitizeOptional(rawEnv.SMTP_TEST_SECRET);
 const smtpSecure = rawEnv.SMTP_SECURE ?? false;
 const clientUrls = parseOptionalUrlList(rawEnv.CLIENT_URLS);
 
@@ -176,5 +178,6 @@ export const env = {
   SMTP_USER: smtpUser,
   SMTP_PASS: smtpPass,
   SMTP_FROM: smtpFrom,
+  SMTP_TEST_SECRET: smtpTestSecret,
   CLIENT_URLS: clientUrls
 };

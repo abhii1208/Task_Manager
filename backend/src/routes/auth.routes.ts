@@ -45,11 +45,40 @@ const ensureGoogleOAuthEnabled = (_req: Request, res: Response, next: NextFuncti
   next();
 };
 
+const ensureSmtpTestAccess = (req: Request, res: Response, next: NextFunction): void => {
+  if (env.NODE_ENV !== "production") {
+    next();
+    return;
+  }
+
+  if (!env.SMTP_TEST_SECRET) {
+    res.status(503).json({
+      success: false,
+      message: "SMTP test endpoint is disabled in production.",
+      error: "SMTP_TEST_SECRET is not configured."
+    });
+    return;
+  }
+
+  const testSecret = req.header("x-test-secret");
+
+  if (testSecret !== env.SMTP_TEST_SECRET) {
+    res.status(403).json({
+      success: false,
+      message: "Forbidden",
+      error: "Invalid test secret."
+    });
+    return;
+  }
+
+  next();
+};
+
 authRouter.post("/register", validate(registerSchema), register);
 authRouter.post("/login", validate(loginSchema), login);
 authRouter.post("/forgot-password", forgotPasswordRateLimiter, validate(forgotPasswordSchema), forgotPassword);
 authRouter.post("/reset-password", validate(resetPasswordSchema), resetPassword);
-authRouter.post("/test-smtp", authenticate, validate(testSmtpSchema), testSmtp);
+authRouter.post("/test-smtp", ensureSmtpTestAccess, validate(testSmtpSchema), testSmtp);
 
 authRouter.get("/google", ensureGoogleOAuthEnabled, (req: Request, res: Response, next: NextFunction) => {
   logOAuth("Starting Google OAuth", { path: req.originalUrl });

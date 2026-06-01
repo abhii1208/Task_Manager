@@ -144,6 +144,7 @@ Base URL: `http://localhost:5000/api`
 - `POST /auth/login`
 - `POST /auth/forgot-password`
 - `POST /auth/reset-password`
+- `POST /auth/test-smtp`
 - `GET /auth/google`
 - `GET /auth/google/callback`
 - `GET /auth/me` (protected)
@@ -220,6 +221,7 @@ Base URL: `http://localhost:5000/api`
    - `SMTP_USER`
    - `SMTP_PASS`
    - `SMTP_FROM`
+   - `SMTP_TEST_SECRET` (required only if you want to call `/api/auth/test-smtp` in production)
    - `NODE_ENV=production`
 6. Run migrations in deploy shell or post-deploy command:
    - `npx prisma migrate deploy`
@@ -305,6 +307,7 @@ SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM="TaskFlow Pro <your-email@gmail.com>"
+SMTP_TEST_SECRET=replace_with_random_secret_for_prod_smtp_test_endpoint
 ```
 
 For Gmail SMTP:
@@ -313,6 +316,11 @@ For Gmail SMTP:
 3. Use the 16-character App Password as `SMTP_PASS` (no spaces).
 4. Keep `SMTP_PORT=587` and `SMTP_SECURE=false`.
 5. Use your full Gmail as `SMTP_USER`.
+
+SMTP test endpoint:
+- `POST /api/auth/test-smtp` with body `{ "email": "recipient@example.com" }`
+- In non-production, the route is open for quick diagnostics.
+- In production, pass header `x-test-secret: <SMTP_TEST_SECRET>`.
 
 ## QA Checklist
 - Register + Login
