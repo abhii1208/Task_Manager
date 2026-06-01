@@ -141,11 +141,9 @@ export const AppLayout = ({
 }: AppLayoutProps) => {
   const { logout } = useAuth();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  // eslint-disable-next-line no-console
-  console.log("[AppLayout] rendered");
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-page-bg text-text-main lg:pl-[272px]">
+    <div className="min-h-screen overflow-x-hidden bg-page-bg text-text-main lg:pl-[260px]">
       <AnimatePresence>
         {isSidebarOpen ? (
           <motion.div
@@ -160,7 +158,7 @@ export const AppLayout = ({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[272px] border-r border-violet-border transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-[260px] border-r border-violet-border transition-transform lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

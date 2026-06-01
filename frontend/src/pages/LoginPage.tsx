@@ -69,16 +69,8 @@ export const LoginPage = () => {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      // eslint-disable-next-line no-console
-      console.log("[Login] started");
-      const loggedInUser = await login(values);
-      // eslint-disable-next-line no-console
-      console.log("[Login] API success", { hasUser: Boolean(loggedInUser) });
-      // eslint-disable-next-line no-console
-      console.log("[Login] context set");
+      await login(values);
       toast.success("Login successful");
-      // eslint-disable-next-line no-console
-      console.log("[Login] navigating dashboard");
       navigate("/dashboard", { replace: true });
 
       window.setTimeout(() => {
@@ -96,15 +88,6 @@ export const LoginPage = () => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // eslint-disable-next-line no-console
-        console.error("Login failed", {
-          apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-          hasResponse: Boolean(error.response),
-          status: error.response?.status,
-          responseMessage: error.response?.data?.message as string | undefined,
-          message: error.message
-        });
-
         if (error.response?.status === 401) {
           toast.error("Invalid email or password.");
           return;
@@ -137,8 +120,6 @@ export const LoginPage = () => {
   const handleGoogleLogin = (): void => {
     try {
       const googleOAuthUrl = getApiUrl("/auth/google");
-      // eslint-disable-next-line no-console
-      console.log("Google OAuth URL:", googleOAuthUrl);
       window.open(googleOAuthUrl, "_self");
     } catch {
       toast.error("API URL is not configured.");

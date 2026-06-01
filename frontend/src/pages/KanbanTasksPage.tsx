@@ -144,7 +144,7 @@ export const KanbanTasksPage = () => {
       searchPlaceholder="Search tasks..."
     >
       <PageTransition>
-        <div className="overflow-hidden rounded-2xl border border-violet-border bg-[#f8f5ff] shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-violet-border bg-page-bg shadow-sm">
           <TaskFilters
             stage={(query.stage as TaskStage | "ALL") ?? "ALL"}
             priority={(query.priority as TaskPriority | "ALL") ?? "ALL"}

@@ -66,9 +66,6 @@ export const DashboardPage = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
 
-  // eslint-disable-next-line no-console
-  console.log("[Dashboard] rendered");
-
   const openCreateTask = useCallback(() => {
     setEditingTask(null);
     setTaskModalOpen(true);

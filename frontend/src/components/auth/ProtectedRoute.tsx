@@ -58,9 +58,6 @@ const AuthRecoveryScreen = () => {
 export const ProtectedRoute = () => {
   const { isBooting, isAuthenticated, authError } = useAuth();
 
-  // eslint-disable-next-line no-console
-  console.log("[ProtectedRoute]", { isBooting, isAuthenticated, authError });
-
   if (isBooting) {
     return <FullPageLoader message="Preparing your workspace..." />;
   }

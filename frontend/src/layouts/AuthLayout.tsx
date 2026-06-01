@@ -74,7 +74,7 @@ export const AuthLayout = ({ title, subtitle, children }: AuthLayoutProps) => {
           </div>
         </section>
 
-        <section className="flex items-center justify-center bg-[#f8f5ff] px-4 py-10 sm:px-8">
+        <section className="flex items-center justify-center bg-page-bg px-4 py-10 sm:px-8">
           <div className="w-full max-w-[560px]">
             <div className="mb-8 lg:hidden">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-sm">

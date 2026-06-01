@@ -10,7 +10,3 @@ export function getApiUrl(path: string): string {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${cleanPath}`;
 }
-
-// Temporary deployment debugging signal for production and preview.
-// eslint-disable-next-line no-console
-console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
