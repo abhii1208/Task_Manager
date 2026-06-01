@@ -11,9 +11,9 @@ import { AuthToggle } from "../components/auth/AuthToggle";
 import { FormInput } from "../components/auth/FormInput";
 import { PasswordInput } from "../components/auth/PasswordInput";
 import { Button } from "../components/ui/Button";
+import { getApiUrl } from "../config/env";
 import { useAuth } from "../hooks/useAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
-import { GOOGLE_OAUTH_URL } from "../utils/constants";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
@@ -65,17 +65,14 @@ export const RegisterPage = () => {
   });
 
   const handleGoogleLogin = (): void => {
-    if (!GOOGLE_OAUTH_URL) {
-      toast.error("API URL is not configured.");
-      return;
-    }
-
-    if (import.meta.env.DEV) {
+    try {
+      const googleOAuthUrl = getApiUrl("/auth/google");
       // eslint-disable-next-line no-console
-      console.info("Google OAuth URL:", GOOGLE_OAUTH_URL);
+      console.log("Google OAuth URL:", googleOAuthUrl);
+      window.location.assign(googleOAuthUrl);
+    } catch {
+      toast.error("API URL is not configured.");
     }
-
-    window.location.assign(GOOGLE_OAUTH_URL);
   };
 
   return (

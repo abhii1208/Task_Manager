@@ -12,9 +12,9 @@ import { AuthToggle } from "../components/auth/AuthToggle";
 import { FormInput } from "../components/auth/FormInput";
 import { PasswordInput } from "../components/auth/PasswordInput";
 import { Button } from "../components/ui/Button";
+import { getApiUrl } from "../config/env";
 import { useAuth } from "../hooks/useAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
-import { GOOGLE_OAUTH_URL } from "../utils/constants";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -67,22 +67,28 @@ export const LoginPage = () => {
       await login(values);
       toast.success("Welcome back");
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Login request failed", {
+        apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+        hasResponse: Boolean((error as { response?: unknown } | undefined)?.response),
+        status: (error as { response?: { status?: number } } | undefined)?.response?.status,
+        message: (error as { message?: string } | undefined)?.message,
+        responseMessage: (error as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message
+      });
+
       toast.error(error instanceof Error ? error.message : "Login failed");
     }
   });
 
   const handleGoogleLogin = (): void => {
-    if (!GOOGLE_OAUTH_URL) {
-      toast.error("API URL is not configured.");
-      return;
-    }
-
-    if (import.meta.env.DEV) {
+    try {
+      const googleOAuthUrl = getApiUrl("/auth/google");
       // eslint-disable-next-line no-console
-      console.info("Google OAuth URL:", GOOGLE_OAUTH_URL);
+      console.log("Google OAuth URL:", googleOAuthUrl);
+      window.location.assign(googleOAuthUrl);
+    } catch {
+      toast.error("API URL is not configured.");
     }
-
-    window.location.assign(GOOGLE_OAUTH_URL);
   };
 
   return (

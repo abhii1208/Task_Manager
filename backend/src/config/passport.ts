@@ -60,6 +60,8 @@ export const initializePassport = (): void => {
   });
 
   if (googleConfigured) {
+    logOAuth("Google strategy initialized", { callbackURL: env.GOOGLE_CALLBACK_URL });
+
     passport.use(
       new GoogleStrategy(
         {

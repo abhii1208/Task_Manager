@@ -10,7 +10,7 @@ It includes a premium SaaS-style frontend (dashboard, Kanban, list view, setting
 
 ## Live Links
 - Frontend (Vercel): `https://your-frontend-url.vercel.app` _(placeholder)_
-- Backend (Render): `https://your-backend-url.onrender.com` _(placeholder)_
+- Backend (Render): `https://task-manager-6aq1.onrender.com`
 
 ## Features
 - Authentication:
@@ -119,6 +119,7 @@ JWT_SECRET=
 JWT_EXPIRES_IN=7d
 PORT=5000
 CLIENT_URL=http://localhost:5173
+CLIENT_URLS=
 BACKEND_URL=http://localhost:5000
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
@@ -136,6 +137,8 @@ NODE_ENV=development
 ### Frontend (`frontend/.env`)
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
+# Production example:
+# VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api
 ```
 
 ## API Documentation
@@ -153,9 +156,9 @@ Base URL: `http://localhost:5000/api`
 ### Health
 - `GET /api/health`
   - Success:
-    - `{ "status": "ok", "service": "TaskFlow Pro API", "database": "connected" }`
+    - `{ "success": true, "status": "ok", "service": "TaskFlow Pro API", "message": "TaskFlow Pro API is running", "timestamp": "2026-06-01T12:00:00.000Z", "database": "connected" }`
   - Failure:
-    - `{ "status": "error", "service": "TaskFlow Pro API", "database": "disconnected", "message": "Database connectivity check failed" }`
+    - `{ "success": false, "status": "error", "service": "TaskFlow Pro API", "timestamp": "2026-06-01T12:00:00.000Z", "database": "disconnected", "message": "Database connectivity check failed" }`
 
 ### Tasks (all protected)
 - `GET /tasks`
@@ -187,8 +190,9 @@ Base URL: `http://localhost:5000/api`
 ## Deployment Instructions
 ### Frontend (Vercel)
 1. Import `frontend/` into Vercel.
-2. Set env var:
-   - `VITE_API_BASE_URL=https://your-backend-url.onrender.com/api`
+2. Set env var exactly (Production + Preview) and redeploy:
+   - `VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api`
+   - Important: the value must include `/api` and must not be localhost.
 3. Build command: `npm run build`
 4. Output directory: `dist`
 
@@ -196,7 +200,7 @@ Base URL: `http://localhost:5000/api`
 1. Create PostgreSQL instance.
 2. Create Web Service for `backend/`.
 3. Build command:
-   - `npm install && npm run build`
+   - `npm install --production=false && npm run build`
 4. Start command:
    - `npm run start`
 5. Add env vars:
@@ -205,11 +209,12 @@ Base URL: `http://localhost:5000/api`
    - `JWT_SECRET`
    - `JWT_EXPIRES_IN`
    - `PORT`
-   - `CLIENT_URL`
-   - `BACKEND_URL`
+   - `CLIENT_URL` (example: `https://your-frontend.vercel.app`)
+   - `CLIENT_URLS` (optional comma-separated allowlist for preview URLs)
+   - `BACKEND_URL` (`https://task-manager-6aq1.onrender.com`)
    - `GOOGLE_CLIENT_ID`
    - `GOOGLE_CLIENT_SECRET`
-   - `GOOGLE_CALLBACK_URL`
+   - `GOOGLE_CALLBACK_URL` (`https://task-manager-6aq1.onrender.com/api/auth/google/callback`)
    - `SESSION_SECRET`
    - `SMTP_HOST`
    - `SMTP_PORT`
@@ -222,18 +227,50 @@ Base URL: `http://localhost:5000/api`
    - `npx prisma migrate deploy`
 
 ## Google OAuth Setup
-Google OAuth Console:
+Google Cloud Console -> APIs & Services -> Credentials -> OAuth 2.0 Client ID:
 - Authorized JavaScript origins:
   - `http://localhost:5173`
-  - `https://your-frontend.vercel.app`
+  - `https://YOUR_FRONTEND_VERCEL_URL.vercel.app`
 - Authorized redirect URIs:
   - `http://localhost:5000/api/auth/google/callback`
-  - `https://your-backend.onrender.com/api/auth/google/callback`
+  - `https://task-manager-6aq1.onrender.com/api/auth/google/callback`
+
+Important:
+- Redirect URI must be backend URL, not frontend URL.
+- URI must include `/api/auth/google/callback`.
+- URI must exactly match the `redirect_uri` shown in Google error output.
+- Do not add trailing slash.
+- Do not use `/auth/google/callback` without `/api`.
 
 Required backend envs:
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 - `GOOGLE_CALLBACK_URL`
+
+Expected backend values on Render:
+```env
+BACKEND_URL=https://task-manager-6aq1.onrender.com
+GOOGLE_CALLBACK_URL=https://task-manager-6aq1.onrender.com/api/auth/google/callback
+CLIENT_URL=https://YOUR_FRONTEND_VERCEL_URL.vercel.app
+```
+
+## Production Troubleshooting
+### "Unable to reach backend. Please check deployment configuration."
+1. Verify backend health is reachable:
+   - `https://task-manager-6aq1.onrender.com/api/health`
+2. Verify frontend env in Vercel:
+   - `VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api`
+3. Redeploy frontend after env updates (Vite envs are baked at build time).
+4. Verify backend CORS env:
+   - `CLIENT_URL=https://YOUR_FRONTEND_VERCEL_URL.vercel.app`
+
+### "Error 400: redirect_uri_mismatch"
+1. Confirm Google authorized redirect URI includes:
+   - `https://task-manager-6aq1.onrender.com/api/auth/google/callback`
+2. Confirm backend env value matches exactly:
+   - `GOOGLE_CALLBACK_URL=https://task-manager-6aq1.onrender.com/api/auth/google/callback`
+3. Confirm backend is initiating OAuth from:
+   - `GET https://task-manager-6aq1.onrender.com/api/auth/google`
 
 ## Forgot Password + SMTP Setup
 How it works:
@@ -283,3 +320,4 @@ For Gmail, use an App Password, not your normal Gmail password.
 - Dark/light mode toggle
 - Refresh with persisted auth session
 - Logout
+

@@ -92,6 +92,7 @@ app.get("/api/health", async (_req, res) => {
       status: "ok",
       service: "TaskFlow Pro API",
       message: "TaskFlow Pro API is running",
+      timestamp: new Date().toISOString(),
       database: "connected"
     });
   } catch {
@@ -99,6 +100,7 @@ app.get("/api/health", async (_req, res) => {
       success: false,
       status: "error",
       service: "TaskFlow Pro API",
+      timestamp: new Date().toISOString(),
       database: "disconnected",
       message: "Database connectivity check failed"
     });

@@ -1,13 +1,29 @@
 import axios from "axios";
 
-import { API_BASE_URL, TOKEN_STORAGE_KEY } from "../utils/constants";
+import { API_BASE_URL } from "../config/env";
+import { TOKEN_STORAGE_KEY } from "../utils/constants";
 
-if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
-  console.info("API_BASE_URL:", API_BASE_URL);
-}
+const TOKEN_STORAGE_KEYS = [TOKEN_STORAGE_KEY, "taskflow_token", "token"] as const;
 
-export const apiClient = axios.create({
+const getStoredToken = (): string | null => {
+  for (const key of TOKEN_STORAGE_KEYS) {
+    const value = localStorage.getItem(key);
+
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+};
+
+const clearStoredTokens = (): void => {
+  for (const key of TOKEN_STORAGE_KEYS) {
+    localStorage.removeItem(key);
+  }
+};
+
+export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
   headers: {
@@ -15,14 +31,14 @@ export const apiClient = axios.create({
   }
 });
 
-apiClient.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   if (!API_BASE_URL) {
     return Promise.reject(
       new Error("API URL is not configured. Set VITE_API_BASE_URL to your deployed backend URL.")
     );
   }
 
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  const token = getStoredToken();
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -31,22 +47,17 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-apiClient.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.error("API request error:", error);
-    }
-
     const status = error.response?.status as number | undefined;
     const responseMessage = error.response?.data?.message as string | undefined;
     const requestUrl = (error.config?.url as string | undefined) ?? "";
     const isAuthLoginRequest = requestUrl.includes("/auth/login");
-    const hadToken = Boolean(localStorage.getItem(TOKEN_STORAGE_KEY));
+    const hadToken = Boolean(getStoredToken());
 
     if (status === 401 && !isAuthLoginRequest && hadToken) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      clearStoredTokens();
       window.dispatchEvent(new CustomEvent("auth:session-expired"));
       return Promise.reject(new Error("Session expired. Please login again."));
     }
@@ -65,3 +76,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(new Error(error.message ?? "Something went wrong. Please try again."));
   }
 );
+
+export const apiClient = api;
