@@ -67,14 +67,22 @@ export const LoginPage = () => {
   const onSubmit = handleSubmit(async (values) => {
     try {
       // eslint-disable-next-line no-console
-      console.log("[Login] submit started");
-      await login(values);
+      console.log("[Login] started");
+      const loggedInUser = await login(values);
       // eslint-disable-next-line no-console
-      console.log("[Login] auth context updated, navigating dashboard");
-      toast.success("Welcome back");
+      console.log("[Login] API success", { hasUser: Boolean(loggedInUser) });
+      // eslint-disable-next-line no-console
+      console.log("[Login] context set");
+      toast.success("Login successful");
+      // eslint-disable-next-line no-console
+      console.log("[Login] navigating dashboard");
       navigate("/dashboard", { replace: true });
-      // eslint-disable-next-line no-console
-      console.log("[Login] success navigating dashboard");
+
+      window.setTimeout(() => {
+        if (!window.location.hash.includes("/dashboard")) {
+          navigate("/dashboard", { replace: true });
+        }
+      }, 300);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // eslint-disable-next-line no-console

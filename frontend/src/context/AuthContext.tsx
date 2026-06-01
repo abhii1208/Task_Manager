@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearSession, refreshUser]);
 
   // eslint-disable-next-line no-console
-  console.log("[AuthProvider]", { isBooting, isAuthenticated, hasUser: Boolean(user) });
+  console.log("[AuthContext]", { isAuthenticated, isBooting, hasUser: Boolean(user), authError });
 
   const value = useMemo(
     () => ({

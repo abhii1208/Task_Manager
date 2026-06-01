@@ -65,7 +65,7 @@ export const ProtectedRoute = () => {
     return <FullPageLoader message="Preparing your workspace..." />;
   }
 
-  if (authError) {
+  if (authError && !isAuthenticated) {
     return <AuthRecoveryScreen />;
   }
 
