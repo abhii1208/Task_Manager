@@ -72,7 +72,7 @@ export const RegisterPage = () => {
       const googleOAuthUrl = getApiUrl("/auth/google");
       // eslint-disable-next-line no-console
       console.log("Google OAuth URL:", googleOAuthUrl);
-      window.location.assign(googleOAuthUrl);
+      window.open(googleOAuthUrl, "_self");
     } catch {
       toast.error("API URL is not configured.");
     }

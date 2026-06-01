@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { useAuth } from "../hooks/useAuth";
 import { FullPageLoader } from "../components/ui/FullPageLoader";
-
-const OAUTH_TOKEN_CACHE_KEY = "tm_oauth_callback_token";
+import { useAuth } from "../hooks/useAuth";
+import { authService } from "../services/auth.service";
+import { setApiAuthToken } from "../services/api";
+import { authToken } from "../utils/authToken";
 
 export const OAuthCallbackPage = () => {
-  const { handleOAuthToken } = useAuth();
+  const { applySession } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const hasProcessed = useRef(false);
@@ -22,13 +23,7 @@ export const OAuthCallbackPage = () => {
     hasProcessed.current = true;
 
     const params = new URLSearchParams(location.search);
-    const tokenFromQuery = params.get("token");
-
-    if (tokenFromQuery) {
-      sessionStorage.setItem(OAUTH_TOKEN_CACHE_KEY, tokenFromQuery);
-    }
-
-    const token = tokenFromQuery ?? sessionStorage.getItem(OAUTH_TOKEN_CACHE_KEY);
+    const token = params.get("token");
 
     if (!token) {
       const message = "OAuth session expired. Please login again.";
@@ -37,38 +32,39 @@ export const OAuthCallbackPage = () => {
       return;
     }
 
-    const processOAuthCallback = async (): Promise<void> => {
+    const runOAuthSession = async (): Promise<void> => {
       try {
-        await handleOAuthToken(token);
-        sessionStorage.removeItem(OAUTH_TOKEN_CACHE_KEY);
+        authToken.set(token);
+        setApiAuthToken(token);
+        const profile = await authService.me();
+        applySession(token, profile);
         navigate("/dashboard", { replace: true });
       } catch {
-        sessionStorage.removeItem(OAUTH_TOKEN_CACHE_KEY);
         const message = "Login succeeded, but profile loading failed. Please try again.";
         setError(message);
         toast.error(message);
       }
     };
 
-    void processOAuthCallback();
-  }, [handleOAuthToken, location.search, navigate]);
+    void runOAuthSession();
+  }, [applySession, location.search, navigate]);
+
+  if (!error) {
+    return <FullPageLoader message="Signing you in..." />;
+  }
 
   return (
-    error ? (
-      <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
-        <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">
-          <p className="text-base font-semibold text-danger">{error}</p>
-          <Link
-            to="/login"
-            replace
-            className="mt-4 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
-          >
-            Back to Login
-          </Link>
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
+      <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">
+        <p className="text-base font-semibold text-danger">{error}</p>
+        <Link
+          to="/login"
+          replace
+          className="mt-4 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+        >
+          Back to Login
+        </Link>
       </div>
-    ) : (
-      <FullPageLoader message="Signing you in..." />
-    )
+    </div>
   );
 };

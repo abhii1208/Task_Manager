@@ -1,33 +1,35 @@
 import axios from "axios";
 
-import { API_BASE_URL } from "../config/env";
-import { clearToken, getToken } from "../utils/authToken";
+import { authToken } from "../utils/authToken";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  // eslint-disable-next-line no-console
+  console.error("VITE_API_BASE_URL is missing");
+}
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15_000,
   headers: {
     "Content-Type": "application/json"
   }
 });
 
-export const setAuthHeader = (token: string): void => {
+export const setApiAuthToken = (token: string): void => {
   api.defaults.headers.common.Authorization = `Bearer ${token}`;
 };
 
-export const clearAuthHeader = (): void => {
+export const clearApiAuthToken = (): void => {
   delete api.defaults.headers.common.Authorization;
 };
 
 api.interceptors.request.use((config) => {
-  if (!API_BASE_URL) {
-    return Promise.reject(
-      new Error("API URL is not configured. Set VITE_API_BASE_URL to your deployed backend URL.")
-    );
-  }
-
-  const token = getToken();
+  const token = authToken.get();
 
   if (token) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -38,13 +40,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
-      clearToken();
-      clearAuthHeader();
-      window.dispatchEvent(new Event("auth:session-expired"));
+      authToken.clear();
+      clearApiAuthToken();
     }
 
     return Promise.reject(error);
   }
 );
-
-export const apiClient = api;

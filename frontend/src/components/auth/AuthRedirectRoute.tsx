@@ -4,9 +4,9 @@ import { useAuth } from "../../hooks/useAuth";
 import { FullPageLoader } from "../ui/FullPageLoader";
 
 export const AuthRedirectRoute = () => {
-  const { isAuthenticated, isAuthLoading } = useAuth();
+  const { isAuthenticated, isBooting } = useAuth();
 
-  if (isAuthLoading) {
+  if (isBooting) {
     return <FullPageLoader message="Checking session..." />;
   }
 

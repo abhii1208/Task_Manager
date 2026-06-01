@@ -141,6 +141,8 @@ export const AppLayout = ({
 }: AppLayoutProps) => {
   const { logout } = useAuth();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  // eslint-disable-next-line no-console
+  console.log("[AppLayout] rendered");
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-page-bg text-text-main lg:pl-[272px]">

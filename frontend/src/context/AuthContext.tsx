@@ -1,235 +1,171 @@
-import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import toast from "react-hot-toast";
+import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { authService } from "../services/auth.service";
-import { clearAuthHeader, setAuthHeader } from "../services/api";
-import { AuthSuccessData, LoginPayload, RegisterPayload, User } from "../types/auth";
-import { clearToken, getToken, setToken } from "../utils/authToken";
+import { clearApiAuthToken, setApiAuthToken } from "../services/api";
+import { LoginPayload, RegisterPayload, User } from "../types/auth";
+import { authToken } from "../utils/authToken";
 
 type AuthContextValue = {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
-  isAuthLoading: boolean;
+  isBooting: boolean;
   authError: string | null;
-  login: (payload: LoginPayload) => Promise<AuthSuccessData>;
-  register: (payload: RegisterPayload) => Promise<AuthSuccessData>;
-  setAuthFromToken: (token: string, user?: User | null) => void;
-  handleOAuthToken: (token: string) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<User>;
+  register: (payload: RegisterPayload) => Promise<User>;
   logout: () => void;
-  refreshProfile: () => Promise<void>;
-  retryAuthCheck: () => Promise<void>;
+  applySession: (token: string, user: User) => void;
+  refreshUser: () => Promise<User>;
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const AUTH_BOOT_TIMEOUT_MS = 5_000;
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setSessionToken] = useState<string | null>(() => getToken());
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isBooting, setIsBooting] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const saveSession = useCallback((nextToken: string, nextUser: User): void => {
-    setToken(nextToken);
-    setAuthHeader(nextToken);
-    setSessionToken(nextToken);
-    setUser(nextUser);
-    setIsAuthenticated(true);
-    setIsAuthLoading(false);
-    setAuthError(null);
-    // eslint-disable-next-line no-console
-    console.log("[Auth] Context updated", { isAuthenticated: true });
-  }, []);
-
-  const setAuthFromToken = useCallback((nextToken: string, nextUser?: User | null): void => {
-    setToken(nextToken);
-    setAuthHeader(nextToken);
-    setSessionToken(nextToken);
-
-    if (nextUser) {
-      setUser(nextUser);
-      setIsAuthenticated(true);
-    }
-
-    setIsAuthLoading(false);
-    setAuthError(null);
-  }, []);
-
   const clearSession = useCallback(() => {
-    clearToken();
-    clearAuthHeader();
-    setSessionToken(null);
+    authToken.clear();
+    clearApiAuthToken();
     setUser(null);
     setIsAuthenticated(false);
     setAuthError(null);
   }, []);
 
-  const refreshProfile = useCallback(async (): Promise<void> => {
-    const profile = await authService.me();
-    setUser(profile);
+  const applySession = useCallback((token: string, nextUser: User): void => {
+    authToken.set(token);
+    setApiAuthToken(token);
+    setUser(nextUser);
     setIsAuthenticated(true);
     setAuthError(null);
+    setIsBooting(false);
   }, []);
 
-  const runSessionHydration = useCallback(
-    async (sessionToken: string, showTimeoutToast = false): Promise<void> => {
-      setAuthHeader(sessionToken);
-
-      const hydrationTimeout = new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error("AUTH_CHECK_TIMEOUT")), 5000);
-      });
-
-      try {
-        await Promise.race([refreshProfile(), hydrationTimeout]);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          clearSession();
-          return;
-        }
-
-        if (error instanceof Error && error.message === "AUTH_CHECK_TIMEOUT") {
-          setAuthError("Starting workspace services... Please retry in a few seconds.");
-          if (showTimeoutToast) {
-            toast.error("Starting workspace services... Please retry in a few seconds.");
-          }
-        } else {
-          setAuthError("Unable to verify your session right now. Please retry.");
-        }
+  const refreshUser = useCallback(async (): Promise<User> => {
+    try {
+      const profile = await authService.me();
+      setUser(profile);
+      setIsAuthenticated(true);
+      setAuthError(null);
+      return profile;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        clearSession();
+      } else {
+        setAuthError("We could not verify your session.");
       }
-    },
-    [clearSession, refreshProfile]
-  );
+
+      throw error;
+    }
+  }, [clearSession]);
 
   const login = useCallback(
-    async (payload: LoginPayload) => {
-      const data = await authService.login(payload);
-      // eslint-disable-next-line no-console
-      console.log("[Auth] Login success", { hasToken: Boolean(data.token), hasUser: Boolean(data.user) });
-      saveSession(data.token, data.user);
-      return data;
+    async (payload: LoginPayload): Promise<User> => {
+      const { token, user: nextUser } = await authService.login(payload);
+      applySession(token, nextUser);
+      return nextUser;
     },
-    [saveSession]
+    [applySession]
   );
 
   const register = useCallback(
-    async (payload: RegisterPayload) => {
-      const data = await authService.register(payload);
-      saveSession(data.token, data.user);
-      return data;
+    async (payload: RegisterPayload): Promise<User> => {
+      const { token, user: nextUser } = await authService.register(payload);
+      applySession(token, nextUser);
+      return nextUser;
     },
-    [saveSession]
-  );
-
-  const handleOAuthToken = useCallback(
-    async (oauthToken: string) => {
-      setAuthFromToken(oauthToken);
-
-      try {
-        const profile = await authService.me();
-        saveSession(oauthToken, profile);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          clearSession();
-        }
-        throw error;
-      }
-    },
-    [clearSession, saveSession, setAuthFromToken]
+    [applySession]
   );
 
   const logout = useCallback(() => {
     clearSession();
-  }, [clearSession]);
-
-  const retryAuthCheck = useCallback(async (): Promise<void> => {
-    if (!token) {
-      setIsAuthLoading(false);
-      setIsAuthenticated(false);
-      setAuthError(null);
-      return;
-    }
-
-    setIsAuthLoading(true);
-    setAuthError(null);
-    await runSessionHydration(token, true);
-    setIsAuthLoading(false);
-  }, [runSessionHydration, token]);
-
-  useEffect(() => {
-    const handleSessionExpired = (): void => {
-      clearSession();
-      toast.error("Session expired. Please login again.");
-    };
-
-    window.addEventListener("auth:session-expired", handleSessionExpired);
-
-    return () => {
-      window.removeEventListener("auth:session-expired", handleSessionExpired);
-    };
+    setIsBooting(false);
   }, [clearSession]);
 
   useEffect(() => {
     let isMounted = true;
 
-    const hydrateUser = async (): Promise<void> => {
-      const existingToken = getToken();
+    const timeoutId = window.setTimeout(() => {
+      if (!isMounted) {
+        return;
+      }
+
+      setIsBooting(false);
+      setAuthError((prev) => prev ?? "Session check timed out. Retry or login again.");
+    }, AUTH_BOOT_TIMEOUT_MS);
+
+    const bootstrapAuth = async (): Promise<void> => {
+      const existingToken = authToken.get();
 
       if (!existingToken) {
         if (!isMounted) {
           return;
         }
-        setSessionToken(null);
+
         setUser(null);
         setIsAuthenticated(false);
         setAuthError(null);
-        setIsAuthLoading(false);
+        setIsBooting(false);
         return;
       }
 
-      if (!isMounted) {
-        return;
-      }
+      setApiAuthToken(existingToken);
 
-      setSessionToken(existingToken);
-      await runSessionHydration(existingToken);
+      try {
+        const profile = await authService.me();
 
-      if (isMounted) {
-        setIsAuthLoading(false);
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(profile);
+        setIsAuthenticated(true);
+        setAuthError(null);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          clearSession();
+        } else {
+          setAuthError("We could not verify your session.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsBooting(false);
+        }
       }
     };
 
-    const timeout = window.setTimeout(() => {
-      if (isMounted) {
-        setIsAuthLoading(false);
-      }
-    }, 5000);
-
-    void hydrateUser();
+    void bootstrapAuth();
 
     return () => {
       isMounted = false;
-      window.clearTimeout(timeout);
+      window.clearTimeout(timeoutId);
     };
-  }, [runSessionHydration]);
+  }, [clearSession]);
+
+  // eslint-disable-next-line no-console
+  console.log("[AuthProvider]", { isBooting, isAuthenticated, hasUser: Boolean(user) });
 
   const value = useMemo(
     () => ({
       user,
-      token,
       isAuthenticated,
-      isAuthLoading,
+      isBooting,
       authError,
       login,
       register,
-      setAuthFromToken,
-      handleOAuthToken,
       logout,
-      refreshProfile,
-      retryAuthCheck
+      applySession,
+      refreshUser
     }),
-    [user, token, isAuthenticated, isAuthLoading, authError, login, register, setAuthFromToken, handleOAuthToken, logout, refreshProfile, retryAuthCheck]
+    [user, isAuthenticated, isBooting, authError, login, register, logout, applySession, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

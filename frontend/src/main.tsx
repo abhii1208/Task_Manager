@@ -1,9 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Suspense } from "react";
+import { HashRouter } from "react-router-dom";
 
 import App from "./App";
-import { AppErrorBoundary } from "./components/common/ErrorBoundary";
+import { AppErrorBoundary } from "./components/ErrorBoundary";
+import { FullPageLoader } from "./components/ui/FullPageLoader";
 import { ToastProvider } from "./components/ui/ToastProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -24,15 +27,19 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <AppErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <HashRouter>
           <AuthProvider>
-            <App />
-            <ToastProvider />
+            <AppErrorBoundary>
+              <Suspense fallback={<FullPageLoader message="Loading workspace..." />}>
+                <App />
+              </Suspense>
+              <ToastProvider />
+            </AppErrorBoundary>
           </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </AppErrorBoundary>
+        </HashRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

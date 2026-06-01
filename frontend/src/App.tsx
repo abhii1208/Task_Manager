@@ -1,10 +1,10 @@
 import { AnimatePresence } from "framer-motion";
-import { Suspense } from "react";
-import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-import { AuthRedirectRoute } from "./components/common/AuthRedirectRoute";
+import { AuthRedirectRoute } from "./components/auth/AuthRedirectRoute";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { FullPageLoader } from "./components/ui/FullPageLoader";
-import { ProtectedRoute } from "./components/common/ProtectedRoute";
+import { useAuth } from "./hooks/useAuth";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { KanbanTasksPage } from "./pages/KanbanTasksPage";
@@ -16,14 +16,25 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
+const RootRedirect = () => {
+  const { isBooting, isAuthenticated } = useAuth();
+
+  if (isBooting) {
+    return <FullPageLoader message="Loading TaskFlow Pro..." />;
+  }
+
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+};
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<RootRedirect />} />
+
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/board" element={<KanbanTasksPage />} />
           <Route path="/list" element={<ListViewPage />} />
@@ -48,13 +59,7 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
-  return (
-    <HashRouter>
-      <Suspense fallback={<FullPageLoader message="Loading workspace..." />}>
-        <AnimatedRoutes />
-      </Suspense>
-    </HashRouter>
-  );
+  return <AnimatedRoutes />;
 };
 
 export default App;

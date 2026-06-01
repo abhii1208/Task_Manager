@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { api } from "./api";
 import { ApiResponse, PaginationMeta } from "../types/api";
 import {
   ActivityLog,
@@ -46,7 +46,7 @@ const normalizeTaskQuery = (query: TaskQueryParams = {}): Record<string, string 
 
 export const taskService = {
   async getTasks(query?: TaskQueryParams): Promise<TaskListResponse> {
-    const response = await apiClient.get<ApiResponse<Task[], PaginationMeta>>("/tasks", {
+    const response = await api.get<ApiResponse<Task[], PaginationMeta>>("/tasks", {
       params: normalizeTaskQuery(query)
     });
 
@@ -62,36 +62,36 @@ export const taskService = {
   },
 
   async getTask(taskId: string): Promise<Task> {
-    const response = await apiClient.get<ApiResponse<Task>>(`/tasks/${taskId}`);
+    const response = await api.get<ApiResponse<Task>>(`/tasks/${taskId}`);
     return response.data.data;
   },
 
   async create(payload: TaskPayload): Promise<Task> {
-    const response = await apiClient.post<ApiResponse<Task>>("/tasks", payload);
+    const response = await api.post<ApiResponse<Task>>("/tasks", payload);
     return response.data.data;
   },
 
   async update(taskId: string, payload: TaskUpdatePayload): Promise<Task> {
-    const response = await apiClient.patch<ApiResponse<Task>>(`/tasks/${taskId}`, payload);
+    const response = await api.patch<ApiResponse<Task>>(`/tasks/${taskId}`, payload);
     return response.data.data;
   },
 
   async delete(taskId: string): Promise<void> {
-    await apiClient.delete(`/tasks/${taskId}`);
+    await api.delete(`/tasks/${taskId}`);
   },
 
   async updateStage(taskId: string, stage: Task["stage"]): Promise<Task> {
-    const response = await apiClient.patch<ApiResponse<Task>>(`/tasks/${taskId}/stage`, { stage });
+    const response = await api.patch<ApiResponse<Task>>(`/tasks/${taskId}/stage`, { stage });
     return response.data.data;
   },
 
   async getSummary(): Promise<TaskSummary> {
-    const response = await apiClient.get<ApiResponse<TaskSummary>>("/tasks/stats/summary");
+    const response = await api.get<ApiResponse<TaskSummary>>("/tasks/stats/summary");
     return response.data.data;
   },
 
   async getRecentActivity(limit = 10): Promise<ActivityLog[]> {
-    const response = await apiClient.get<ApiResponse<ActivityLog[]>>("/tasks/activity/recent", {
+    const response = await api.get<ApiResponse<ActivityLog[]>>("/tasks/activity/recent", {
       params: { limit }
     });
     return response.data.data;

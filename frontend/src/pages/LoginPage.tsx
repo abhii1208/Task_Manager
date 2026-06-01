@@ -67,10 +67,14 @@ export const LoginPage = () => {
   const onSubmit = handleSubmit(async (values) => {
     try {
       // eslint-disable-next-line no-console
-      console.log("Login target:", `${import.meta.env.VITE_API_BASE_URL}/auth/login`);
+      console.log("[Login] submit started");
       await login(values);
+      // eslint-disable-next-line no-console
+      console.log("[Login] auth context updated, navigating dashboard");
       toast.success("Welcome back");
       navigate("/dashboard", { replace: true });
+      // eslint-disable-next-line no-console
+      console.log("[Login] success navigating dashboard");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // eslint-disable-next-line no-console
@@ -116,7 +120,7 @@ export const LoginPage = () => {
       const googleOAuthUrl = getApiUrl("/auth/google");
       // eslint-disable-next-line no-console
       console.log("Google OAuth URL:", googleOAuthUrl);
-      window.location.href = googleOAuthUrl;
+      window.open(googleOAuthUrl, "_self");
     } catch {
       toast.error("API URL is not configured.");
     }
@@ -153,7 +157,15 @@ export const LoginPage = () => {
             <PasswordInput label={undefined} placeholder="********" error={errors.password?.message} {...register("password")} />
           </div>
 
-          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting} loadingText="Signing in...">
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            variant="primary"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
+            loadingText="Signing in..."
+          >
             Continue to Workspace
           </Button>
         </motion.form>
