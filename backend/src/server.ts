@@ -22,6 +22,7 @@ initializePassport();
 
 const allowedOrigins = [
   env.CLIENT_URL,
+  "https://task-manager-8rvp.vercel.app",
   ...env.CLIENT_URLS,
   "http://localhost:5173",
   "http://localhost:3000"
@@ -41,7 +42,7 @@ const corsOptions: CorsOptions = {
   credentials: true
 };
 
-app.options("*", cors(corsOptions));
+app.options("*", cors());
 app.use(
   cors(corsOptions)
 );
@@ -99,20 +100,12 @@ app.get("/api/health/db", async (_req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       status: "ok",
-      message: "Database connection is healthy",
-      timestamp: new Date().toISOString(),
-      database: "connected"
+      message: "Database connection is healthy"
     });
-  } catch (error) {
-    const errorName = error instanceof Error ? error.name : "UnknownError";
-
-    res.status(503).json({
+  } catch {
+    res.status(500).json({
       success: false,
-      status: "error",
-      timestamp: new Date().toISOString(),
-      database: "disconnected",
-      message: "Database connectivity check failed",
-      error: errorName
+      message: "Database connection failed"
     });
   }
 });
@@ -123,7 +116,7 @@ app.use("/api/tasks", taskRouter);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-const startServer = async (): Promise<void> => {
+const logInitialDatabaseConnection = async (): Promise<void> => {
   try {
     await prisma.$connect();
     await prisma.$queryRaw`SELECT 1`;
@@ -131,7 +124,7 @@ const startServer = async (): Promise<void> => {
     console.log("[Database] Connected successfully");
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("[Database] Connection failed");
+    console.error("[Database] Initial connection failed");
 
     if (error instanceof Error) {
       // eslint-disable-next-line no-console
@@ -144,13 +137,16 @@ const startServer = async (): Promise<void> => {
     console.error("[Database] DATABASE_URL configured:", Boolean(process.env.DATABASE_URL));
     // eslint-disable-next-line no-console
     console.error("[Database] NODE_ENV:", process.env.NODE_ENV);
-    process.exit(1);
   }
+};
 
+const startServer = (): void => {
   app.listen(env.PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`[Server] Running on port ${env.PORT}`);
   });
+
+  void logInitialDatabaseConnection();
 };
 
-void startServer();
+startServer();

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { Chrome } from "lucide-react";
 import { useEffect } from "react";
@@ -67,16 +68,34 @@ export const LoginPage = () => {
       await login(values);
       toast.success("Welcome back");
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Login request failed", {
-        apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-        hasResponse: Boolean((error as { response?: unknown } | undefined)?.response),
-        status: (error as { response?: { status?: number } } | undefined)?.response?.status,
-        message: (error as { message?: string } | undefined)?.message,
-        responseMessage: (error as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message
-      });
+      if (axios.isAxiosError(error)) {
+        // eslint-disable-next-line no-console
+        console.error("Login failed", {
+          apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+          hasResponse: Boolean(error.response),
+          status: error.response?.status,
+          responseMessage: error.response?.data?.message as string | undefined,
+          message: error.message
+        });
 
-      toast.error(error instanceof Error ? error.message : "Login failed");
+        if (error.response?.status === 401) {
+          toast.error("Invalid email or password.");
+          return;
+        }
+
+        if (error.response) {
+          const responseMessage = error.response.data?.message as string | undefined;
+          toast.error(responseMessage ?? "Login failed");
+          return;
+        }
+
+        if (error.request) {
+          toast.error("Unable to reach backend. Check VITE_API_BASE_URL, Render health URL, and CORS.");
+          return;
+        }
+      }
+
+      toast.error(error instanceof Error ? error.message : "Something went wrong. Please try again.");
     }
   });
 
