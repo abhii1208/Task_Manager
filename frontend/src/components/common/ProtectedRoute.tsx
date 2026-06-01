@@ -1,12 +1,15 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/Button";
-import { FullPageLoader } from "./FullPageLoader";
+import { FullPageLoader } from "../ui/FullPageLoader";
 
 export const ProtectedRoute = () => {
   const { isAuthenticated, isAuthLoading, authError, token, retryAuthCheck } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  // eslint-disable-next-line no-console
+  console.log("[ProtectedRoute]", { isLoading: isAuthLoading, isAuthenticated });
 
   if (isAuthLoading) {
     return <FullPageLoader message="Preparing your workspace..." />;
@@ -22,7 +25,7 @@ export const ProtectedRoute = () => {
             <Button variant="secondary" onClick={() => void retryAuthCheck()}>
               Retry
             </Button>
-            <Button variant="primary" onClick={() => window.location.assign("/login")}>
+            <Button variant="primary" onClick={() => navigate("/login", { replace: true })}>
               Go to login
             </Button>
           </div>

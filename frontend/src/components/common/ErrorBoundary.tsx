@@ -35,7 +35,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
               <Button variant="secondary" onClick={() => window.location.reload()}>
                 Reload app
               </Button>
-              <Button variant="primary" onClick={() => window.location.assign("/login")}>
+              <Button variant="primary" onClick={() => window.location.assign("/#/login")}>
                 Go to login
               </Button>
             </div>

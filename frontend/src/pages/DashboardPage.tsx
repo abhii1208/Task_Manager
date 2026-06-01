@@ -1,5 +1,5 @@
 import { Activity, CalendarClock, CheckCircle2, Clock3, ListTodo, Loader2, PlusCircle, TimerReset } from "lucide-react";
-import { ReactNode, useCallback, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { ErrorState } from "../components/common/ErrorState";
@@ -65,6 +65,11 @@ export const DashboardPage = () => {
   const [isTaskModalOpen, setTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log("[Dashboard] mounted");
+  }, []);
 
   const openCreateTask = useCallback(() => {
     setEditingTask(null);

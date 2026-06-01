@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AuthRedirectRoute } from "./components/common/AuthRedirectRoute";
-import { FullPageLoader } from "./components/common/FullPageLoader";
+import { FullPageLoader } from "./components/ui/FullPageLoader";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";

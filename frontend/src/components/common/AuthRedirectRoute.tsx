@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
-import { FullPageLoader } from "./FullPageLoader";
+import { FullPageLoader } from "../ui/FullPageLoader";
 
 export const AuthRedirectRoute = () => {
   const { isAuthenticated, isAuthLoading } = useAuth();

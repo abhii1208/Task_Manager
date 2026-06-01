@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 
 import { authService } from "../services/auth.service";
 import { clearAuthHeader, setAuthHeader } from "../services/api";
-import { LoginPayload, RegisterPayload, User } from "../types/auth";
+import { AuthSuccessData, LoginPayload, RegisterPayload, User } from "../types/auth";
 import { clearToken, getToken, setToken } from "../utils/authToken";
 
 type AuthContextValue = {
@@ -13,8 +13,9 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isAuthLoading: boolean;
   authError: string | null;
-  login: (payload: LoginPayload) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<AuthSuccessData>;
+  register: (payload: RegisterPayload) => Promise<AuthSuccessData>;
+  setAuthFromToken: (token: string, user?: User | null) => void;
   handleOAuthToken: (token: string) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
@@ -36,6 +37,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSessionToken(nextToken);
     setUser(nextUser);
     setIsAuthenticated(true);
+    setIsAuthLoading(false);
+    setAuthError(null);
+    // eslint-disable-next-line no-console
+    console.log("[Auth] Context updated", { isAuthenticated: true });
+  }, []);
+
+  const setAuthFromToken = useCallback((nextToken: string, nextUser?: User | null): void => {
+    setToken(nextToken);
+    setAuthHeader(nextToken);
+    setSessionToken(nextToken);
+
+    if (nextUser) {
+      setUser(nextUser);
+      setIsAuthenticated(true);
+    }
+
+    setIsAuthLoading(false);
     setAuthError(null);
   }, []);
 
@@ -79,8 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setAuthError("Unable to verify your session right now. Please retry.");
         }
-
-        setIsAuthenticated(false);
       }
     },
     [clearSession, refreshProfile]
@@ -89,7 +105,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback(
     async (payload: LoginPayload) => {
       const data = await authService.login(payload);
+      // eslint-disable-next-line no-console
+      console.log("[Auth] Login success", { hasToken: Boolean(data.token), hasUser: Boolean(data.user) });
       saveSession(data.token, data.user);
+      return data;
     },
     [saveSession]
   );
@@ -98,14 +117,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async (payload: RegisterPayload) => {
       const data = await authService.register(payload);
       saveSession(data.token, data.user);
+      return data;
     },
     [saveSession]
   );
 
   const handleOAuthToken = useCallback(
     async (oauthToken: string) => {
-      setToken(oauthToken);
-      setAuthHeader(oauthToken);
+      setAuthFromToken(oauthToken);
 
       try {
         const profile = await authService.me();
@@ -117,7 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw error;
       }
     },
-    [clearSession, saveSession]
+    [clearSession, saveSession, setAuthFromToken]
   );
 
   const logout = useCallback(() => {
@@ -152,20 +171,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearSession]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const hydrateUser = async (): Promise<void> => {
-      if (!token) {
+      const existingToken = getToken();
+
+      if (!existingToken) {
+        if (!isMounted) {
+          return;
+        }
+        setSessionToken(null);
         setUser(null);
         setIsAuthenticated(false);
+        setAuthError(null);
         setIsAuthLoading(false);
         return;
       }
 
-      await runSessionHydration(token);
-      setIsAuthLoading(false);
+      if (!isMounted) {
+        return;
+      }
+
+      setSessionToken(existingToken);
+      await runSessionHydration(existingToken);
+
+      if (isMounted) {
+        setIsAuthLoading(false);
+      }
     };
 
+    const timeout = window.setTimeout(() => {
+      if (isMounted) {
+        setIsAuthLoading(false);
+      }
+    }, 5000);
+
     void hydrateUser();
-  }, [runSessionHydration, token]);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeout);
+    };
+  }, [runSessionHydration]);
 
   const value = useMemo(
     () => ({
@@ -176,12 +223,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       authError,
       login,
       register,
+      setAuthFromToken,
       handleOAuthToken,
       logout,
       refreshProfile,
       retryAuthCheck
     }),
-    [user, token, isAuthenticated, isAuthLoading, authError, login, register, handleOAuthToken, logout, refreshProfile, retryAuthCheck]
+    [user, token, isAuthenticated, isAuthLoading, authError, login, register, setAuthFromToken, handleOAuthToken, logout, refreshProfile, retryAuthCheck]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,9 +1,9 @@
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
+import { FullPageLoader } from "../components/ui/FullPageLoader";
 
 const OAUTH_TOKEN_CACHE_KEY = "tm_oauth_callback_token";
 
@@ -54,27 +54,21 @@ export const OAuthCallbackPage = () => {
   }, [handleOAuthToken, location.search, navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
-      <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">
-        {error ? (
-          <>
-            <p className="text-base font-semibold text-danger">{error}</p>
-            <Link
-              to="/login"
-              replace
-              className="mt-4 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
-            >
-              Back to Login
-            </Link>
-          </>
-        ) : (
-          <>
-            <Loader2 className="mx-auto mb-3 animate-spin text-brand" size={26} />
-            <p className="text-base font-semibold text-text-main">Signing you in...</p>
-            <p className="mt-1 text-sm text-text-secondary">Please wait while we complete your secure login.</p>
-          </>
-        )}
+    error ? (
+      <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
+        <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">
+          <p className="text-base font-semibold text-danger">{error}</p>
+          <Link
+            to="/login"
+            replace
+            className="mt-4 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+          >
+            Back to Login
+          </Link>
+        </div>
       </div>
-    </div>
+    ) : (
+      <FullPageLoader message="Signing you in..." />
+    )
   );
 };
