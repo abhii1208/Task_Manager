@@ -144,7 +144,7 @@ export const KanbanTasksPage = () => {
       searchPlaceholder="Search tasks..."
     >
       <PageTransition>
-        <div className="overflow-hidden rounded-2xl border border-violet-border bg-[#f8f7ff] shadow-soft">
+        <div className="overflow-hidden rounded-2xl border border-violet-border bg-[#f8f5ff] shadow-sm">
           <TaskFilters
             stage={(query.stage as TaskStage | "ALL") ?? "ALL"}
             priority={(query.priority as TaskPriority | "ALL") ?? "ALL"}
@@ -159,7 +159,7 @@ export const KanbanTasksPage = () => {
             }}
           />
 
-          <div className="border-b border-violet-border bg-white/70 px-4 py-2 text-sm text-text-secondary sm:px-6">
+          <div className="border-b border-violet-border bg-white/70 px-4 py-2 text-[13px] text-text-secondary sm:px-6">
             {tasks.length} tasks shown | {activeFilterCount} active filters
           </div>
 
@@ -167,10 +167,10 @@ export const KanbanTasksPage = () => {
 
           <div className="p-4 sm:p-6">
             {isLoading ? (
-              <div className="flex gap-5 overflow-x-auto">
-                <Skeleton className="h-[420px] w-[90vw] shrink-0 sm:w-[360px] lg:w-full" />
-                <Skeleton className="h-[420px] w-[90vw] shrink-0 sm:w-[360px] lg:w-full" />
-                <Skeleton className="h-[420px] w-[90vw] shrink-0 sm:w-[360px] lg:w-full" />
+              <div className="flex gap-4 overflow-x-auto">
+                <Skeleton className="h-[400px] w-[90vw] shrink-0 sm:w-[340px] lg:w-full" />
+                <Skeleton className="h-[400px] w-[90vw] shrink-0 sm:w-[340px] lg:w-full" />
+                <Skeleton className="h-[400px] w-[90vw] shrink-0 sm:w-[340px] lg:w-full" />
               </div>
             ) : tasks.length ? (
               <KanbanBoard

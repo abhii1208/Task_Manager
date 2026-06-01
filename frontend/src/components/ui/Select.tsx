@@ -21,9 +21,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select ref={ref} id={selectId} className={cn("input-base appearance-none pr-10", className)} {...props}>
             {children}
           </select>
-          <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted" />
         </div>
-        {error ? <p className="mt-1 text-xs font-semibold text-danger">{error}</p> : hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
+        {error ? <p className="mt-1 text-[13px] font-medium text-danger">{error}</p> : hint ? <p className="mt-1 text-[13px] text-text-muted">{hint}</p> : null}
       </div>
     );
   }

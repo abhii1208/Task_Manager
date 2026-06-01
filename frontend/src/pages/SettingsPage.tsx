@@ -12,7 +12,7 @@ export const SettingsPage = () => {
     <AppLayout title="Settings" subtitle="Manage account, appearance, and session controls." hideSearch>
       <PageTransition>
         <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-2xl border border-violet-border bg-white p-5 shadow-soft">
+          <section className="rounded-2xl border border-violet-border bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <ShieldCheck size={18} className="text-brand" />
               <h2 className="text-lg font-bold text-text-main">Profile</h2>
@@ -39,7 +39,7 @@ export const SettingsPage = () => {
           </section>
 
           <section className="space-y-4">
-            <div className="rounded-2xl border border-violet-border bg-white p-5 shadow-soft">
+            <div className="rounded-2xl border border-violet-border bg-white p-5 shadow-sm">
               <div className="mb-3 flex items-center gap-2">
                 <Palette size={18} className="text-brand" />
                 <h2 className="text-lg font-bold text-text-main">Appearance</h2>
@@ -47,7 +47,7 @@ export const SettingsPage = () => {
               <p className="text-sm text-text-secondary">This workspace uses the premium light violet theme by default.</p>
             </div>
 
-            <div className="rounded-2xl border border-violet-border bg-white p-5 shadow-soft">
+            <div className="rounded-2xl border border-violet-border bg-white p-5 shadow-sm">
               <div className="mb-3 flex items-center gap-2">
                 <KeyRound size={18} className="text-brand" />
                 <h2 className="text-lg font-bold text-text-main">Session</h2>

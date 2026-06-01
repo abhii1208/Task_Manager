@@ -30,10 +30,10 @@ export const ConfirmDialog = ({
       disableClose={Boolean(isLoading)}
       footer={
         <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="ghost" onClick={onCancel} disabled={isLoading}>
+          <Button variant="secondary" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={() => void onConfirm()} isLoading={isLoading}>
+          <Button variant="danger" onClick={() => void onConfirm()} isLoading={isLoading} loadingText="Deleting...">
             {confirmLabel}
           </Button>
         </div>

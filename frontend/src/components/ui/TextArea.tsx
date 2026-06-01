@@ -16,8 +16,8 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     return (
       <div>
         {label ? <label className="label-base" htmlFor={areaId}>{label}</label> : null}
-        <textarea ref={ref} id={areaId} className={cn("input-base min-h-28 resize-y py-2.5", className)} {...props} />
-        {error ? <p className="mt-1 text-xs font-semibold text-danger">{error}</p> : hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
+        <textarea ref={ref} id={areaId} className={cn("input-base min-h-24 resize-y py-2", className)} {...props} />
+        {error ? <p className="mt-1 text-[13px] font-medium text-danger">{error}</p> : hint ? <p className="mt-1 text-[13px] text-text-muted">{hint}</p> : null}
       </div>
     );
   }

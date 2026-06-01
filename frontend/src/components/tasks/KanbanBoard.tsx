@@ -61,7 +61,7 @@ export const KanbanBoard = ({ tasks, onMoveTask, onEditTask, onDeleteTask, onCre
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-5 overflow-x-auto pb-3 lg:grid lg:grid-cols-3 lg:overflow-visible">
+      <div className="flex gap-4 overflow-x-auto pb-3 lg:grid lg:grid-cols-3 lg:overflow-visible">
         {STAGES.map((stage) => (
           <KanbanColumn
             key={stage}

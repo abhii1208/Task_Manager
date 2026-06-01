@@ -33,27 +33,27 @@ const TaskCardBody = ({ task, onEdit, onDelete, isBusy = false }: Omit<TaskCardP
   const hasOverdueDate = isOverdue(task.dueDate) && task.stage !== "DONE";
 
   return (
-    <article className={cn("rounded-xl border border-violet-border bg-white p-5 shadow-sm transition duration-200 hover:shadow-soft", isBusy ? "opacity-70" : "")}>
+    <article className={cn("rounded-xl border border-outline bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-[1px] hover:shadow-soft", isBusy ? "opacity-70" : "")}>
       <div className="mb-4 flex items-start justify-between gap-2">
         <PriorityBadge priority={task.priority} />
 
         <div className="flex items-center gap-1">
-          <Button variant="ghost" className="h-7 w-7 px-0 text-slate-500 hover:text-brand" onClick={() => onEdit(task)} disabled={isBusy} aria-label="Edit task">
+          <Button variant="ghost" className="h-7 w-7 px-0 text-text-muted hover:text-brand" onClick={() => onEdit(task)} disabled={isBusy} aria-label="Edit task">
             <Pencil size={14} />
           </Button>
-          <Button variant="ghost" className="h-7 w-7 px-0 text-slate-500 hover:bg-red-50 hover:text-danger" onClick={() => onDelete(task)} disabled={isBusy} aria-label="Delete task">
+          <Button variant="danger" className="h-7 w-7 px-0" onClick={() => onDelete(task)} disabled={isBusy} aria-label="Delete task">
             <Trash2 size={14} />
           </Button>
         </div>
       </div>
 
-      <h4 className="text-xl font-bold text-text-main">{task.title}</h4>
-      <p className="mt-2 text-base text-text-secondary">{task.description || "No description provided."}</p>
+      <h4 className="text-[15px] font-semibold text-text-main">{task.title}</h4>
+      <p className="mt-2 text-[13px] text-text-secondary">{task.description || "No description provided."}</p>
 
-      <div className="mt-5">
+      <div className="mt-4">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-sm font-medium text-text-secondary">Progress</span>
-          <span className="text-sm font-semibold text-text-secondary">{progress}%</span>
+          <span className="text-[13px] font-medium text-text-secondary">Progress</span>
+          <span className="text-[13px] font-semibold text-text-secondary">{progress}%</span>
         </div>
         <div className="h-2 rounded-full bg-slate-200/80">
           <div
@@ -63,13 +63,13 @@ const TaskCardBody = ({ task, onEdit, onDelete, isBusy = false }: Omit<TaskCardP
         </div>
       </div>
 
-      <div className="mt-5 flex items-center justify-between">
-        <div className={cn("inline-flex items-center gap-1.5 text-sm", hasOverdueDate ? "font-semibold text-danger" : "text-text-secondary")}>
-          <CalendarDays size={14} />
+      <div className="mt-4 flex items-center justify-between">
+        <div className={cn("inline-flex items-center gap-1.5 text-[13px]", hasOverdueDate ? "font-semibold text-danger" : "text-text-secondary")}>
+          <CalendarDays size={13} />
           {task.stage === "DONE" ? `Completed ${formatDate(task.updatedAt)}` : formatDate(task.dueDate)}
         </div>
 
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-soft text-[11px] font-bold text-brand">
           {getInitial(task.title)}
         </span>
       </div>

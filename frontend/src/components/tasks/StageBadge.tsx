@@ -9,5 +9,15 @@ const toneMap: Record<TaskStage, "neutral" | "info" | "success"> = {
 };
 
 export const StageBadge = ({ stage }: { stage: TaskStage }) => {
-  return <Badge tone={toneMap[stage]} className="normal-case tracking-normal">{STAGE_LABELS[stage]}</Badge>;
+  const classMap: Record<TaskStage, string> = {
+    TODO: "bg-slate-100 text-slate-600",
+    IN_PROGRESS: "bg-violet-100 text-violet-700",
+    DONE: "bg-green-100 text-green-700"
+  };
+
+  return (
+    <Badge tone={toneMap[stage]} className={`normal-case tracking-normal ${classMap[stage]}`}>
+      {STAGE_LABELS[stage]}
+    </Badge>
+  );
 };

@@ -22,23 +22,23 @@ const dotClassMap: Record<TaskStage, string> = {
 
 export const KanbanColumn = ({ stage, tasks, onEdit, onDelete, onCreateTask, isTaskBusy }: KanbanColumnProps) => {
   return (
-    <section className="w-[90vw] shrink-0 sm:w-[360px] lg:w-auto">
+    <section className="w-[90vw] shrink-0 sm:w-[340px] lg:w-auto">
       <div className="mb-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Circle size={11} fill="currentColor" className={dotClassMap[stage]} />
-          <h3 className="text-[20px] font-bold tracking-tight text-text-main">{STAGE_LABELS[stage]}</h3>
-          <span className="inline-flex min-w-7 justify-center rounded-md bg-brand-soft px-2 py-0.5 text-xs font-semibold text-text-secondary">
+          <h3 className="text-[16px] font-bold tracking-tight text-text-main">{STAGE_LABELS[stage]}</h3>
+          <span className="inline-flex min-w-6 justify-center rounded-md bg-brand-soft px-2 py-0.5 text-[11px] font-semibold text-text-secondary">
             {tasks.length}
           </span>
         </div>
 
         <button
           type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary transition hover:bg-brand-soft-bg hover:text-brand"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-violet-border text-text-secondary transition hover:bg-brand-soft-bg hover:text-brand"
           onClick={() => onCreateTask?.(stage)}
           aria-label={`Add ${STAGE_LABELS[stage]} task`}
         >
-          <Plus size={20} />
+          <Plus size={17} />
         </button>
       </div>
 
@@ -47,7 +47,7 @@ export const KanbanColumn = ({ stage, tasks, onEdit, onDelete, onCreateTask, isT
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`min-h-[260px] space-y-4 rounded-2xl p-1 transition ${snapshot.isDraggingOver ? "bg-[#f1edff]" : "bg-transparent"}`}
+            className={`min-h-[240px] space-y-4 rounded-2xl border border-violet-border bg-white p-3 transition ${snapshot.isDraggingOver ? "bg-[#f3efff]" : ""}`}
           >
             {tasks.map((task, index) => (
               <TaskCard key={task.id} task={task} index={index} draggable isBusy={isTaskBusy?.(task.id)} onEdit={onEdit} onDelete={onDelete} />
@@ -56,10 +56,10 @@ export const KanbanColumn = ({ stage, tasks, onEdit, onDelete, onCreateTask, isT
 
             <button
               type="button"
-              className="flex min-h-[74px] w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-violet-border bg-white text-base font-semibold text-text-secondary transition hover:bg-brand-soft-bg hover:text-brand"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-success px-4 text-sm font-semibold text-white transition hover:bg-success-hover"
               onClick={() => onCreateTask?.(stage)}
             >
-              <Plus size={20} />
+              <Plus size={16} />
               Add Task
             </button>
           </div>

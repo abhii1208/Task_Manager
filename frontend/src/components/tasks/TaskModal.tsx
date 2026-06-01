@@ -132,13 +132,13 @@ export const TaskModal = ({ open, task, defaultStage = "TODO", isSubmitting, onC
           <span>{task ? "Edit Task" : "Create Task"}</span>
         </div>
       }
-      className="max-w-[1080px]"
-      contentClassName="!max-h-[calc(92vh-80px)] !overflow-hidden !p-0"
+      className="max-w-[960px]"
+      contentClassName="!max-h-[calc(90vh-72px)] !overflow-hidden !p-0"
       disableClose={isSubmitting}
     >
-      <div className="grid max-h-[calc(92vh-80px)] min-h-[560px] lg:grid-cols-[1.65fr_1fr]">
-        <div className="overflow-y-auto p-6 sm:p-7">
-          <form className="space-y-5" onSubmit={submit}>
+      <div className="grid max-h-[calc(90vh-72px)] min-h-[500px] lg:grid-cols-[1.7fr_1fr]">
+        <div className="overflow-y-auto p-5 sm:p-6">
+          <form className="space-y-4" onSubmit={submit}>
             <Input label="Task Title" placeholder="Implement Redux state for User Auth" error={errors.title?.message} {...register("title")} />
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -150,13 +150,13 @@ export const TaskModal = ({ open, task, defaultStage = "TODO", isSubmitting, onC
 
               <div>
                 <label className="label-base">Priority</label>
-                <div className="grid grid-cols-3 rounded-lg bg-brand-soft-bg p-1">
+                <div className="grid h-10 grid-cols-3 rounded-xl bg-brand-soft-bg p-1">
                   {PRIORITY_OPTIONS.map((option) => (
                     <button
                       key={option.value}
                       type="button"
                       onClick={() => setValue("priority", option.value, { shouldValidate: true })}
-                      className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
+                      className={`rounded-lg px-3 py-1 text-sm font-semibold transition ${
                         selectedPriority === option.value ? "bg-brand text-white shadow-sm" : "text-text-secondary hover:text-brand"
                       }`}
                     >
@@ -176,24 +176,24 @@ export const TaskModal = ({ open, task, defaultStage = "TODO", isSubmitting, onC
               label="Description"
               placeholder="Add acceptance criteria, blockers, and references..."
               error={errors.description?.message}
-              className="min-h-[170px]"
+              className="min-h-24"
               {...register("description")}
             />
 
             <Input label="Tags" placeholder="frontend, auth, sprint" hint="Comma-separated tags" {...register("tags")} />
 
-            <div className="flex flex-wrap justify-end gap-3 pt-2">
-              <Button variant="ghost" type="button" onClick={onClose} disabled={isSubmitting}>
+            <div className="flex flex-wrap justify-end gap-3 pt-1">
+              <Button variant="secondary" type="button" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" variant={task ? "primary" : "success"} isLoading={isSubmitting}>
+              <Button type="submit" variant={task ? "primary" : "create"} isLoading={isSubmitting} loadingText={task ? "Saving..." : "Creating..."}>
                 {task ? "Save Changes" : "Create Task"}
               </Button>
             </div>
           </form>
         </div>
 
-        <aside className="flex flex-col border-l border-violet-border bg-[#f5f2ff]">
+        <aside className="hidden border-l border-violet-border bg-[#f5f2ff] lg:flex lg:flex-col">
           <div className="flex items-center gap-2 border-b border-violet-border px-5 py-4">
             <CheckCircle2 size={17} className="text-brand" />
             <p className="text-sm font-bold uppercase tracking-[0.08em] text-text-main">Activity Feed</p>
@@ -208,7 +208,7 @@ export const TaskModal = ({ open, task, defaultStage = "TODO", isSubmitting, onC
 
                 <div className="min-w-0">
                   <p className="text-sm leading-relaxed text-text-main">{item.content}</p>
-                  <p className="mt-1 text-xs font-medium text-text-muted">{item.time}</p>
+                  <p className="mt-1 text-[13px] font-medium text-text-muted">{item.time}</p>
                 </div>
               </div>
             ))}
@@ -216,7 +216,7 @@ export const TaskModal = ({ open, task, defaultStage = "TODO", isSubmitting, onC
 
           <div className="border-t border-violet-border p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-11 flex-1 items-center rounded-full border border-violet-border bg-white px-3">
+              <div className="flex h-10 flex-1 items-center rounded-full border border-violet-border bg-white px-3">
                 <Link2 size={14} className="text-text-muted" />
                 <input
                   type="text"
@@ -226,7 +226,7 @@ export const TaskModal = ({ open, task, defaultStage = "TODO", isSubmitting, onC
               </div>
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand text-white transition hover:bg-brand-hover"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition hover:bg-brand-hover"
                 aria-label="Send comment"
               >
                 <SendHorizontal size={18} />

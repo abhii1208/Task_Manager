@@ -17,7 +17,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <div>
         {label ? <label className="label-base" htmlFor={inputId}>{label}</label> : null}
         <input ref={ref} id={inputId} className={cn("input-base", className)} {...props} />
-        {error ? <p className="mt-1 text-xs font-semibold text-danger">{error}</p> : hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
+        {error ? <p className="mt-1 text-[13px] font-medium text-danger">{error}</p> : hint ? <p className="mt-1 text-[13px] text-text-muted">{hint}</p> : null}
       </div>
     );
   }

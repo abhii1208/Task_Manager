@@ -7,8 +7,8 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 };
 
 const toneClasses: Record<NonNullable<BadgeProps["tone"]>, string> = {
-  neutral: "bg-slate-100 text-slate-700",
-  success: "bg-emerald-100 text-emerald-700",
+  neutral: "bg-slate-100 text-slate-600",
+  success: "bg-green-100 text-green-700",
   warning: "bg-amber-100 text-amber-700",
   danger: "bg-red-100 text-red-700",
   info: "bg-violet-100 text-violet-700"
@@ -17,7 +17,7 @@ const toneClasses: Record<NonNullable<BadgeProps["tone"]>, string> = {
 export const Badge = ({ tone = "neutral", className, ...props }: BadgeProps) => {
   return (
     <span
-      className={cn("inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.05em]", toneClasses[tone], className)}
+      className={cn("inline-flex items-center rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.05em]", toneClasses[tone], className)}
       {...props}
     />
   );

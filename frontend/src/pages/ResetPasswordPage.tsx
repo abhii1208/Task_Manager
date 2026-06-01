@@ -100,7 +100,7 @@ export const ResetPasswordPage = () => {
             {...register("confirmPassword")}
           />
 
-          <Button type="submit" className="w-full" size="lg" variant="success" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting} loadingText="Resetting...">
             Reset Password
           </Button>
         </motion.form>

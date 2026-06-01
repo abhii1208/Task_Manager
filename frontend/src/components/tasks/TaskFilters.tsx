@@ -39,7 +39,7 @@ export const TaskFilters = ({
 
       <Select
         value={stage}
-        className="h-11 min-w-[170px] rounded-lg border-violet-border bg-white px-3 text-sm font-semibold"
+        className="h-10 min-w-[170px] rounded-xl border-violet-border bg-white px-3 text-sm font-medium"
         onChange={(event) => onStageChange(event.target.value as TaskStage | "ALL")}
       >
         <option value="ALL">Stage: All</option>
@@ -52,7 +52,7 @@ export const TaskFilters = ({
 
       <Select
         value={priority}
-        className="h-11 min-w-[170px] rounded-lg border-violet-border bg-white px-3 text-sm font-semibold"
+        className="h-10 min-w-[170px] rounded-xl border-violet-border bg-white px-3 text-sm font-medium"
         onChange={(event) => onPriorityChange(event.target.value as TaskPriority | "ALL")}
       >
         <option value="ALL">Priority: All</option>
@@ -66,7 +66,7 @@ export const TaskFilters = ({
       {showSort ? (
         <Select
           value={`${sortBy}:${sortOrder}`}
-          className="h-11 min-w-[170px] rounded-lg border-violet-border bg-white px-3 text-sm font-semibold"
+          className="h-10 min-w-[170px] rounded-xl border-violet-border bg-white px-3 text-sm font-medium"
           onChange={(event) => {
             const [nextSortBy, nextSortOrder] = event.target.value.split(":") as [TaskSortBy, TaskSortOrder];
             onSortChange(nextSortBy, nextSortOrder);
@@ -80,7 +80,7 @@ export const TaskFilters = ({
         </Select>
       ) : null}
 
-      <Button variant="ghost" className="ml-auto" onClick={onReset}>
+      <Button variant="secondary" className="ml-auto" onClick={onReset}>
         Reset
       </Button>
     </div>

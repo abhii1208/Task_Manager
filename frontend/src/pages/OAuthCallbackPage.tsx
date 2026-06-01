@@ -55,7 +55,7 @@ export const OAuthCallbackPage = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
-      <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-8 py-7 text-center shadow-soft">
+      <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">
         {error ? (
           <>
             <p className="text-base font-semibold text-danger">OAuth login failed. Please try again.</p>

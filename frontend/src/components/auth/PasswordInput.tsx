@@ -29,13 +29,13 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <button
             type="button"
             onClick={() => setIsVisible((current) => !current)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-500 transition hover:bg-violet-50"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-text-muted transition hover:bg-brand-soft"
             aria-label={isVisible ? "Hide password" : "Show password"}
           >
             {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
-        {error ? <p className="mt-1 text-xs font-semibold text-danger">{error}</p> : hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
+        {error ? <p className="mt-1 text-[13px] font-medium text-danger">{error}</p> : hint ? <p className="mt-1 text-[13px] text-text-muted">{hint}</p> : null}
       </div>
     );
   }

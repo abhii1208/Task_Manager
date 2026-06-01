@@ -14,7 +14,7 @@ import { AppLayout } from "../layouts/AppLayout";
 import { Task, TaskPayload } from "../types/task";
 import { formatDate, formatDateTime } from "../utils/date";
 
-const cardBaseClass = "rounded-2xl border border-violet-border bg-white p-5 shadow-soft";
+const cardBaseClass = "rounded-2xl border border-violet-border bg-white p-5 shadow-sm";
 
 const StatCard = ({
   label,
@@ -29,10 +29,10 @@ const StatCard = ({
 }) => (
   <div className={cardBaseClass}>
     <div className="flex items-center justify-between">
-      <span className="text-sm font-semibold uppercase tracking-[0.06em] text-text-secondary">{label}</span>
+      <span className="text-[13px] font-semibold uppercase tracking-[0.06em] text-text-secondary">{label}</span>
       <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-brand">{icon}</span>
     </div>
-    {isLoading ? <Skeleton className="mt-3 h-9 w-24" /> : <p className="mt-3 text-3xl font-extrabold text-text-main">{value}</p>}
+    {isLoading ? <Skeleton className="mt-3 h-8 w-24" /> : <p className="mt-3 text-[26px] font-bold text-text-main">{value}</p>}
   </div>
 );
 
@@ -130,23 +130,19 @@ export const DashboardPage = () => {
           <StatCard label="Upcoming Deadlines" value={summary?.upcomingTasks ?? 0} icon={<Clock3 size={16} />} isLoading={isSummaryLoading} />
 
           <div className={cardBaseClass}>
-            <p className="text-sm font-semibold uppercase tracking-[0.06em] text-text-secondary">Quick Action</p>
-            <button
-              type="button"
-              onClick={openCreateTask}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-success px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 active:scale-[0.98]"
-            >
+            <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-text-secondary">Quick Action</p>
+            <Button type="button" variant="create" className="mt-4 inline-flex w-full" onClick={openCreateTask}>
               <PlusCircle size={16} />
               Create Task (N)
-            </button>
+            </Button>
           </div>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
           <div className={cardBaseClass}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-text-main">Recent Activity</h2>
-              <p className="text-sm font-medium text-text-muted">Latest changes</p>
+              <h2 className="text-lg font-bold text-text-main">Recent Activity</h2>
+              <p className="text-[13px] font-medium text-text-muted">Latest changes</p>
             </div>
 
             {isActivityLoading ? (
@@ -160,7 +156,7 @@ export const DashboardPage = () => {
                 {recentActivity.slice(0, 6).map((item) => (
                   <div key={item.id} className="rounded-xl border border-violet-border bg-white p-3">
                     <p className="text-sm font-semibold text-text-main">{item.message}</p>
-                    <p className="mt-1 text-sm text-text-muted">{formatDateTime(item.createdAt)}</p>
+                    <p className="mt-1 text-[13px] text-text-muted">{formatDateTime(item.createdAt)}</p>
                   </div>
                 ))}
               </div>
@@ -171,7 +167,7 @@ export const DashboardPage = () => {
 
           <div className="space-y-4">
             <div className={cardBaseClass}>
-              <h2 className="text-xl font-bold text-text-main">Upcoming Deadlines</h2>
+              <h2 className="text-lg font-bold text-text-main">Upcoming Deadlines</h2>
               <div className="mt-3 space-y-2">
                 {isLoading ? (
                   <>
@@ -189,7 +185,7 @@ export const DashboardPage = () => {
                       }}
                     >
                       <p className="truncate text-sm font-semibold text-text-main">{task.title}</p>
-                      <p className="mt-1 text-sm text-text-secondary">{formatDate(task.dueDate)}</p>
+                      <p className="mt-1 text-[13px] text-text-secondary">{formatDate(task.dueDate)}</p>
                     </button>
                   ))
                 ) : (
@@ -199,8 +195,8 @@ export const DashboardPage = () => {
             </div>
 
             <div className={cardBaseClass}>
-              <h2 className="text-xl font-bold text-text-main">Progress</h2>
-              <p className="mt-2 text-sm text-text-secondary">
+              <h2 className="text-lg font-bold text-text-main">Progress</h2>
+              <p className="mt-2 text-[13px] text-text-secondary">
                 {summary?.doneCount ?? 0} of {summary?.totalTasks ?? 0} tasks completed
               </p>
               <div className="mt-3 h-3 w-full rounded-full bg-slate-200">
@@ -211,7 +207,7 @@ export const DashboardPage = () => {
         </section>
 
         <section className="mt-6">
-          <h2 className="mb-3 text-2xl font-extrabold text-text-main">Recent Tasks</h2>
+          <h2 className="mb-3 text-xl font-bold text-text-main">Recent Tasks</h2>
           <div className="space-y-3">
             {tasks.slice(0, 5).map((task) => (
               <div key={task.id} className={cardBaseClass}>
@@ -224,7 +220,7 @@ export const DashboardPage = () => {
                     <Button variant="secondary" onClick={() => { setEditingTask(task); setTaskModalOpen(true); }}>
                       Edit
                     </Button>
-                    <Button variant="ghost" className="text-red-600 hover:bg-red-50" onClick={() => setDeletingTask(task)}>
+                    <Button variant="danger" onClick={() => setDeletingTask(task)}>
                       Delete
                     </Button>
                   </div>

@@ -51,6 +51,7 @@ api.interceptors.response.use(
   (error) => {
     if (error?.response?.status === 401) {
       clearStoredTokens();
+      window.dispatchEvent(new Event("auth:session-expired"));
     }
 
     return Promise.reject(error);

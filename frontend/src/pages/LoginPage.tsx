@@ -141,7 +141,7 @@ export const LoginPage = () => {
             <PasswordInput label={undefined} placeholder="********" error={errors.password?.message} {...register("password")} />
           </div>
 
-          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting} loadingText="Logging in...">
             Continue to Workspace
           </Button>
         </motion.form>
@@ -152,7 +152,7 @@ export const LoginPage = () => {
           <div className="h-px flex-1 bg-violet-border" />
         </div>
 
-        <Button type="button" variant="secondary" className="w-full gap-2" onClick={handleGoogleLogin}>
+        <Button type="button" variant="primary" className="w-full gap-2" onClick={handleGoogleLogin}>
           <Chrome size={16} />
           Continue with Google
         </Button>

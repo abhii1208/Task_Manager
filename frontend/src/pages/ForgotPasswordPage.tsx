@@ -55,7 +55,7 @@ export const ForgotPasswordPage = () => {
             {...register("email")}
           />
 
-          <Button type="submit" className="w-full" size="lg" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" size="lg" variant="primary" isLoading={isSubmitting} loadingText="Sending...">
             Send Reset Link
           </Button>
         </motion.form>

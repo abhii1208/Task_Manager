@@ -6,9 +6,9 @@ type StageBadgeProps = {
 };
 
 const stageClassMap: Record<TaskStage, string> = {
-  TODO: "bg-blue-100 text-blue-700",
-  IN_PROGRESS: "bg-amber-100 text-amber-700",
-  DONE: "bg-emerald-100 text-emerald-700"
+  TODO: "bg-slate-100 text-slate-600",
+  IN_PROGRESS: "bg-violet-100 text-violet-700",
+  DONE: "bg-green-100 text-green-700"
 };
 
 export const StageBadge = ({ stage }: StageBadgeProps) => {

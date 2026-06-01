@@ -106,7 +106,7 @@ export const RegisterPage = () => {
             {...register("password")}
           />
 
-          <Button type="submit" className="w-full" size="lg" variant="success" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" size="lg" variant="create" isLoading={isSubmitting} loadingText="Creating account...">
             Create Account
           </Button>
         </motion.form>
@@ -117,7 +117,7 @@ export const RegisterPage = () => {
           <div className="h-px flex-1 bg-violet-border" />
         </div>
 
-        <Button type="button" variant="secondary" className="w-full gap-2" onClick={handleGoogleLogin}>
+        <Button type="button" variant="primary" className="w-full gap-2" onClick={handleGoogleLogin}>
           <Chrome size={16} />
           Continue with Google
         </Button>

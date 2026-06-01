@@ -4,24 +4,24 @@
 
 :root {
   color-scheme: light;
-  --bg-main: #f8f7ff;
-  --page-bg: #f7f5ff;
+  --bg-main: #f8f5ff;
+  --page-bg: #f8f5ff;
   --surface: #ffffff;
-  --surface-soft: #f4f0ff;
-  --surface-soft-2: #eeeafe;
-  --border: #d8d2eb;
-  --soft-border: #e7e2f3;
+  --surface-soft: #f3efff;
+  --surface-soft-2: #ede9fe;
+  --border: #e5e7eb;
+  --soft-border: #e5e7eb;
   --text-main: #111827;
-  --text-secondary: #334155;
+  --text-secondary: #374151;
   --text-muted: #64748b;
-  --primary: #3323cc;
-  --primary-hover: #2416a8;
-  --primary-soft: #eeeafe;
-  --brand: #3323cc;
-  --brand-hover: #2416a8;
-  --brand-soft: #eeeafe;
-  --brand-soft-bg: #f4f0ff;
-  --violet-border: #d8d2eb;
+  --primary: #5b21b6;
+  --primary-hover: #4c1d95;
+  --primary-soft: #ede9fe;
+  --brand: #5b21b6;
+  --brand-hover: #4c1d95;
+  --brand-soft: #ede9fe;
+  --brand-soft-bg: #f3efff;
+  --violet-border: #ddd6fe;
   --success: #16a34a;
   --success-hover: #15803d;
   --danger: #dc2626;
@@ -39,7 +39,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
   background: var(--page-bg);
   color: var(--text-main);
@@ -61,12 +61,12 @@ body {
 }
 
 .input-base {
-  @apply h-12 w-full rounded-xl border bg-white px-4 text-base text-slate-900 outline-none transition duration-200 ease-premium placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-indigo-100;
+  @apply h-10 w-full rounded-xl border bg-white px-3 text-sm text-text-main outline-none transition duration-200 ease-premium placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-violet-100;
   border-color: var(--violet-border);
 }
 
 .label-base {
-  @apply mb-2 block text-[12px] font-bold uppercase tracking-[0.08em];
+  @apply mb-2 block text-[12px] font-semibold uppercase tracking-[0.08em];
   color: var(--text-secondary);
 }
 
@@ -74,7 +74,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--violet-border);
   border-radius: 1.1rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 14px 30px rgba(51, 35, 204, 0.08);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 16px rgba(91, 33, 182, 0.08);
 }
 
 .glass,
@@ -90,5 +90,5 @@ body {
 }
 
 .page-container {
-  @apply mx-auto w-full max-w-7xl px-4 sm:px-6;
+  @apply mx-auto w-full max-w-[1440px] px-4 sm:px-5 lg:px-6;
 }

@@ -48,7 +48,7 @@ export const Modal = ({ open, title, description, onClose, children, footer, cla
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-700/30 p-4 backdrop-blur-[3px]"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-700/30 p-3 sm:p-4 backdrop-blur-[3px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -58,7 +58,7 @@ export const Modal = ({ open, title, description, onClose, children, footer, cla
             role="dialog"
             aria-modal="true"
             className={cn(
-              "w-full max-h-[92vh] overflow-hidden rounded-2xl border border-violet-border bg-white shadow-[0_24px_52px_rgba(15,23,42,0.2)]",
+              "w-full max-h-[90vh] overflow-hidden rounded-2xl border border-violet-border bg-white shadow-[0_20px_44px_rgba(15,23,42,0.18)]",
               className
             )}
             initial={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -69,15 +69,15 @@ export const Modal = ({ open, title, description, onClose, children, footer, cla
           >
             <div className="flex items-start justify-between gap-3 border-b border-violet-border px-5 py-4 sm:px-6">
               <div>
-                <div className="text-xl font-bold text-text-main">{title}</div>
+                <div className="text-[20px] font-bold text-text-main">{title}</div>
                 {description ? <p className="mt-1 text-sm text-text-secondary">{description}</p> : null}
               </div>
-              <Button variant="ghost" className="h-9 w-9 px-0 text-slate-600" onClick={handleRequestClose} disabled={disableClose} aria-label="Close modal">
+              <Button variant="ghost" className="h-9 w-9 px-0 text-text-secondary" onClick={handleRequestClose} disabled={disableClose} aria-label="Close modal">
                 <X size={16} />
               </Button>
             </div>
 
-            <div className={cn("max-h-[calc(92vh-132px)] overflow-y-auto px-5 py-5 sm:px-6", contentClassName)}>{children}</div>
+            <div className={cn("max-h-[calc(90vh-128px)] overflow-y-auto px-5 py-5 sm:px-6", contentClassName)}>{children}</div>
             {footer ? <div className="border-t border-violet-border px-5 py-4 sm:px-6">{footer}</div> : null}
           </motion.div>
         </motion.div>
