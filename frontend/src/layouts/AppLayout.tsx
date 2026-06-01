@@ -104,8 +104,8 @@ const SidebarContent = ({ onNavigate, onCreateTask, createButtonLabel, onLogout 
             {userInitials || "U"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-text-main">{user?.name ?? "Alex Rivera"}</p>
-            <p className="truncate text-xs text-text-muted">{user?.email ?? "user@taskflow.pro"}</p>
+            <p className="truncate text-sm font-semibold text-text-main">{user?.name ?? "User"}</p>
+            <p className="truncate text-xs text-text-muted">{user?.email ?? ""}</p>
           </div>
           <Button variant="ghost" className="h-8 w-8 px-0 text-text-secondary" onClick={onLogout} aria-label="Logout">
             <LogOut size={16} />

@@ -13,9 +13,10 @@ type AuthContextValue = {
   authError: string | null;
   login: (payload: LoginPayload) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
-  logout: () => void;
   applySession: (token: string, user: User) => void;
-  refreshUser: () => Promise<User>;
+  refreshUser: () => Promise<User | null>;
+  clearSession: () => void;
+  logout: () => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setIsAuthenticated(false);
     setAuthError(null);
+    setIsBooting(false);
   }, []);
 
   const applySession = useCallback((token: string, nextUser: User): void => {
@@ -45,20 +47,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsBooting(false);
   }, []);
 
-  const refreshUser = useCallback(async (): Promise<User> => {
+  const refreshUser = useCallback(async (): Promise<User | null> => {
+    const existingToken = authToken.get();
+
+    if (!existingToken) {
+      clearSession();
+      return null;
+    }
+
+    setApiAuthToken(existingToken);
+
     try {
       const profile = await authService.me();
       setUser(profile);
       setIsAuthenticated(true);
       setAuthError(null);
+      setIsBooting(false);
       return profile;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         clearSession();
-      } else {
-        setAuthError("We could not verify your session.");
+        return null;
       }
 
+      setAuthError("Unable to verify session. Please retry.");
+      setIsAuthenticated(false);
+      setIsBooting(false);
       throw error;
     }
   }, [clearSession]);
@@ -83,20 +97,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     clearSession();
-    setIsBooting(false);
   }, [clearSession]);
 
   useEffect(() => {
     let isMounted = true;
+    let hasBootSettled = false;
 
     const timeoutId = window.setTimeout(() => {
-      if (!isMounted) {
+      if (!isMounted || hasBootSettled) {
         return;
       }
 
+      hasBootSettled = true;
       setIsBooting(false);
-      setAuthError((prev) => prev ?? "Session check timed out. Retry or login again.");
+      setAuthError((previous) => previous ?? "Unable to verify session. Please retry.");
     }, AUTH_BOOT_TIMEOUT_MS);
+
+    const finalizeBoot = (): void => {
+      if (!isMounted || hasBootSettled) {
+        return;
+      }
+
+      hasBootSettled = true;
+      setIsBooting(false);
+      window.clearTimeout(timeoutId);
+    };
 
     const bootstrapAuth = async (): Promise<void> => {
       const existingToken = authToken.get();
@@ -106,39 +131,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        setUser(null);
-        setIsAuthenticated(false);
-        setAuthError(null);
-        setIsBooting(false);
+        clearSession();
+        finalizeBoot();
         return;
       }
 
       setApiAuthToken(existingToken);
 
       try {
-        const profile = await authService.me();
-
-        if (!isMounted) {
-          return;
-        }
-
-        setUser(profile);
-        setIsAuthenticated(true);
-        setAuthError(null);
-      } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          clearSession();
-        } else {
-          setAuthError("We could not verify your session.");
-        }
+        await refreshUser();
+      } catch {
+        finalizeBoot();
       } finally {
-        if (isMounted) {
-          setIsBooting(false);
-        }
+        finalizeBoot();
       }
     };
 
@@ -148,7 +153,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isMounted = false;
       window.clearTimeout(timeoutId);
     };
-  }, [clearSession]);
+  }, [clearSession, refreshUser]);
 
   // eslint-disable-next-line no-console
   console.log("[AuthProvider]", { isBooting, isAuthenticated, hasUser: Boolean(user) });
@@ -161,11 +166,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       authError,
       login,
       register,
-      logout,
       applySession,
-      refreshUser
+      refreshUser,
+      clearSession,
+      logout
     }),
-    [user, isAuthenticated, isBooting, authError, login, register, logout, applySession, refreshUser]
+    [user, isAuthenticated, isBooting, authError, login, register, applySession, refreshUser, clearSession, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -38,12 +38,5 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error?.response?.status === 401) {
-      authToken.clear();
-      clearApiAuthToken();
-    }
-
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );

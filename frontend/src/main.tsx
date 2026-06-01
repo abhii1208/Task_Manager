@@ -27,19 +27,19 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <HashRouter>
-          <AuthProvider>
+    <HashRouter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeProvider>
             <AppErrorBoundary>
               <Suspense fallback={<FullPageLoader message="Loading workspace..." />}>
                 <App />
               </Suspense>
               <ToastProvider />
             </AppErrorBoundary>
-          </AuthProvider>
-        </HashRouter>
-      </ThemeProvider>
-    </QueryClientProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </HashRouter>
   </React.StrictMode>
 );
