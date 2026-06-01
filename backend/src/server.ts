@@ -1,5 +1,7 @@
 import cors from "cors";
 import express from "express";
+import type { Request, Response } from "express";
+import type { CorsOptions } from "cors";
 import rateLimit from "express-rate-limit";
 import session from "express-session";
 import helmet from "helmet";
@@ -18,18 +20,16 @@ const app = express();
 app.set("trust proxy", 1);
 initializePassport();
 
-const allowedOrigins = new Set(
-  [
-    env.CLIENT_URL,
-    ...env.CLIENT_URLS,
-    "http://localhost:5173",
-    "http://localhost:3000"
-  ].filter(Boolean)
-);
+const allowedOrigins = [
+  env.CLIENT_URL,
+  ...env.CLIENT_URLS,
+  "http://localhost:5173",
+  "http://localhost:3000"
+].filter(Boolean) as string[];
 
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.has(origin)) {
+const corsOptions: CorsOptions = {
+  origin: (origin: string | undefined, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
       return;
     }
@@ -84,7 +84,7 @@ const authRateLimiter = rateLimit({
   }
 });
 
-app.get("/api/health", async (_req, res) => {
+app.get("/api/health", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     status: "ok",
@@ -93,7 +93,7 @@ app.get("/api/health", async (_req, res) => {
   });
 });
 
-app.get("/api/health/db", async (_req, res) => {
+app.get("/api/health/db", async (_req: Request, res: Response) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
