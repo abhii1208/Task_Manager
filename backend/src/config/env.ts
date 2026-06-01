@@ -35,9 +35,61 @@ const envSchema = z.object({
   SMTP_FROM: z.string().trim().optional()
 });
 
+const stripWrappingQuotes = (value: string): string => {
+  if (
+    (value.startsWith("\"") && value.endsWith("\"")) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1).trim();
+  }
+
+  return value;
+};
+
 const sanitizeOptional = (value?: string): string | undefined => {
   const trimmed = value?.trim();
-  return trimmed ? trimmed : undefined;
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const normalized = stripWrappingQuotes(trimmed);
+  return normalized ? normalized : undefined;
+};
+
+const normalizeSmtpPass = (value?: string): string | undefined => {
+  const sanitized = sanitizeOptional(value);
+
+  if (!sanitized) {
+    return undefined;
+  }
+
+  // Gmail app passwords are often copied as groups with spaces.
+  return sanitized.replace(/\s+/g, "");
+};
+
+const normalizeSmtpFrom = (value?: string): string | undefined => {
+  const sanitized = sanitizeOptional(value);
+
+  if (!sanitized) {
+    return undefined;
+  }
+
+  const markdownMailToMatch = sanitized.match(/^(.+?)\s*\[([^\]]+)\]\(mailto:[^)]+\)$/i);
+
+  if (markdownMailToMatch) {
+    const displayName = markdownMailToMatch[1].trim();
+    const email = markdownMailToMatch[2].trim();
+    return `${displayName} <${email}>`;
+  }
+
+  const plainMailToMatch = sanitized.match(/^mailto:(.+)$/i);
+
+  if (plainMailToMatch) {
+    return plainMailToMatch[1].trim();
+  }
+
+  return sanitized;
 };
 
 const parseOptionalUrlList = (value?: string): string[] => {
@@ -104,8 +156,8 @@ const googleClientId = sanitizeOptional(rawEnv.GOOGLE_CLIENT_ID);
 const googleClientSecret = sanitizeOptional(rawEnv.GOOGLE_CLIENT_SECRET);
 const smtpHost = sanitizeOptional(rawEnv.SMTP_HOST);
 const smtpUser = sanitizeOptional(rawEnv.SMTP_USER);
-const smtpPass = sanitizeOptional(rawEnv.SMTP_PASS);
-const smtpFrom = sanitizeOptional(rawEnv.SMTP_FROM);
+const smtpPass = normalizeSmtpPass(rawEnv.SMTP_PASS);
+const smtpFrom = normalizeSmtpFrom(rawEnv.SMTP_FROM);
 const smtpSecure = rawEnv.SMTP_SECURE ?? false;
 const clientUrls = parseOptionalUrlList(rawEnv.CLIENT_URLS);
 

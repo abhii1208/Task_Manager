@@ -14,7 +14,7 @@ type AuthContextValue = {
   login: (payload: LoginPayload) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
   applySession: (token: string, user: User) => void;
-  refreshUser: () => Promise<User | null>;
+  refreshUser: () => Promise<User | undefined>;
   clearSession: () => void;
   logout: () => void;
 };
@@ -47,12 +47,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsBooting(false);
   }, []);
 
-  const refreshUser = useCallback(async (): Promise<User | null> => {
+  const refreshUser = useCallback(async (): Promise<User | undefined> => {
     const existingToken = authToken.get();
 
     if (!existingToken) {
       clearSession();
-      return null;
+      return undefined;
     }
 
     setApiAuthToken(existingToken);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         clearSession();
-        return null;
+        return undefined;
       }
 
       setAuthError("Unable to verify session. Please retry.");

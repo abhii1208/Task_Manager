@@ -41,14 +41,48 @@ const createPasswordResetText = (name: string, resetUrl: string): string => {
 };
 
 export const sendPasswordResetEmail = async (to: string, resetUrl: string, name = "there"): Promise<void> => {
-  const transporter = createMailTransporter();
-  const from = getSmtpFromAddress();
+  try {
+    const transporter = createMailTransporter();
+    const from = getSmtpFromAddress();
 
-  await transporter.sendMail({
-    from,
-    to,
-    subject: "Reset your TaskFlow Pro password",
-    html: createPasswordResetHtml(name, resetUrl),
-    text: createPasswordResetText(name, resetUrl)
-  });
+    // eslint-disable-next-line no-console
+    console.log("[SMTP] Sending reset email", { to });
+
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject: "Reset your TaskFlow Pro password",
+      html: createPasswordResetHtml(name, resetUrl),
+      text: createPasswordResetText(name, resetUrl)
+    });
+
+    // eslint-disable-next-line no-console
+    console.log("[SMTP] Reset email sent", { messageId: info.messageId });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown SMTP error";
+    throw new Error(`Failed to send password reset email: ${message}`);
+  }
+};
+
+export const sendSmtpTestEmail = async (to: string): Promise<void> => {
+  try {
+    const transporter = createMailTransporter();
+    const from = getSmtpFromAddress();
+
+    // eslint-disable-next-line no-console
+    console.log("[SMTP] Sending SMTP test email", { to });
+
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject: "TaskFlow Pro SMTP test email",
+      text: "TaskFlow Pro SMTP test email"
+    });
+
+    // eslint-disable-next-line no-console
+    console.log("[SMTP] SMTP test email sent", { messageId: info.messageId });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown SMTP error";
+    throw new Error(`Failed to send SMTP test email: ${message}`);
+  }
 };

@@ -42,3 +42,9 @@ export const resetPasswordSchema = z.object({
       )
   })
 });
+
+export const testSmtpSchema = z.object({
+  body: z.object({
+    email: z.string().trim().email("Invalid email address").transform((value) => value.toLowerCase())
+  })
+});

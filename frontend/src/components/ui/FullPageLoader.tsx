@@ -2,7 +2,7 @@ type FullPageLoaderProps = {
   message?: string;
 };
 
-export const FullPageLoader = ({ message = "Preparing your workspace..." }: FullPageLoaderProps) => {
+export const FullPageLoader = ({ message = "Loading TaskFlow Pro..." }: FullPageLoaderProps) => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
       <div className="rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">

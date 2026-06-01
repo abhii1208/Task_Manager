@@ -24,23 +24,29 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
     console.error(error, info);
   }
 
+  private handleReload = (): void => {
+    window.location.reload();
+  };
+
+  private handleGoToLogin = (): void => {
+    localStorage.removeItem("taskflow_token");
+    window.location.assign("/#/login");
+  };
+
   render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-page-bg px-4">
           <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white p-6 text-center shadow-sm">
             <h1 className="text-xl font-bold text-text-main">Something went wrong.</h1>
-            <p className="mt-2 text-sm text-text-secondary">Try reloading the app or signing in again.</p>
+            <p className="mt-2 text-sm text-text-secondary">TaskFlow Pro could not load this page.</p>
             <div className="mt-5 flex items-center justify-center gap-3">
-              <Button variant="secondary" onClick={() => window.history.go(0)}>
+              <Button variant="secondary" onClick={this.handleReload}>
                 Reload app
               </Button>
-              <a
-                href="/#/login"
-                className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-hover"
-              >
+              <Button variant="primary" onClick={this.handleGoToLogin}>
                 Go to Login
-              </a>
+              </Button>
             </div>
           </div>
         </div>

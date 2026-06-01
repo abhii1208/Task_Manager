@@ -28,6 +28,21 @@ const allowedOrigins = [
   "http://localhost:3000"
 ].filter(Boolean) as string[];
 
+// eslint-disable-next-line no-console
+console.log("[Env] CLIENT_URL configured:", Boolean(env.CLIENT_URL));
+// eslint-disable-next-line no-console
+console.log("[Env] DATABASE_URL configured:", Boolean(env.DATABASE_URL));
+// eslint-disable-next-line no-console
+console.log(
+  "[Env] SMTP configured:",
+  Boolean(env.SMTP_HOST && env.SMTP_PORT && env.SMTP_USER && env.SMTP_PASS && env.SMTP_FROM)
+);
+// eslint-disable-next-line no-console
+console.log(
+  "[Env] GOOGLE configured:",
+  Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.GOOGLE_CALLBACK_URL)
+);
+
 const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -37,7 +52,7 @@ const corsOptions: CorsOptions = {
 
     // eslint-disable-next-line no-console
     console.error(`[CORS] Blocked origin: ${origin}`);
-    callback(new Error(`CORS blocked origin: ${origin}`));
+    callback(null, false);
   },
   credentials: true
 };

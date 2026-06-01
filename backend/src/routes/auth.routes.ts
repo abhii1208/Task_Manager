@@ -4,10 +4,10 @@ import passport from "passport";
 
 import { env } from "../config/env";
 import { isGoogleOAuthEnabled } from "../config/passport";
-import { forgotPassword, login, me, oauthFailure, register, resetPassword } from "../controllers/auth.controller";
+import { forgotPassword, login, me, oauthFailure, register, resetPassword, testSmtp } from "../controllers/auth.controller";
 import { authenticate } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
-import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from "../schemas/auth.schema";
+import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema, testSmtpSchema } from "../schemas/auth.schema";
 import { signToken } from "../utils/jwt";
 
 const authRouter = Router();
@@ -49,6 +49,7 @@ authRouter.post("/register", validate(registerSchema), register);
 authRouter.post("/login", validate(loginSchema), login);
 authRouter.post("/forgot-password", forgotPasswordRateLimiter, validate(forgotPasswordSchema), forgotPassword);
 authRouter.post("/reset-password", validate(resetPasswordSchema), resetPassword);
+authRouter.post("/test-smtp", authenticate, validate(testSmtpSchema), testSmtp);
 
 authRouter.get("/google", ensureGoogleOAuthEnabled, (req: Request, res: Response, next: NextFunction) => {
   logOAuth("Starting Google OAuth", { path: req.originalUrl });

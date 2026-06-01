@@ -279,7 +279,7 @@ DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-no
 How it works:
 1. `POST /api/auth/forgot-password` always returns a generic success message.
 2. If the user exists, backend creates a 32-byte reset token, stores only its SHA-256 hash, and expiry (15 minutes).
-3. Reset email is sent with link: `CLIENT_URL/reset-password?token=<raw-token>`.
+3. Reset email is sent with hash-router link: `CLIENT_URL/#/reset-password?token=<raw-token>`.
 4. `POST /api/auth/reset-password` validates token hash + expiry, updates password, and clears token fields.
 
 Security decisions:
@@ -307,7 +307,12 @@ SMTP_PASS=your-app-password
 SMTP_FROM="TaskFlow Pro <your-email@gmail.com>"
 ```
 
-For Gmail, use an App Password, not your normal Gmail password.
+For Gmail SMTP:
+1. Enable Google 2-Step Verification.
+2. Create an App Password under Google Account -> Security -> App Passwords.
+3. Use the 16-character App Password as `SMTP_PASS` (no spaces).
+4. Keep `SMTP_PORT=587` and `SMTP_SECURE=false`.
+5. Use your full Gmail as `SMTP_USER`.
 
 ## QA Checklist
 - Register + Login

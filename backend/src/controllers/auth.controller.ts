@@ -7,7 +7,7 @@ import { env } from "../config/env";
 import { prisma } from "../config/prisma";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { AppError } from "../middleware/error.middleware";
-import { sendPasswordResetEmail } from "../services/email.service";
+import { sendPasswordResetEmail, sendSmtpTestEmail } from "../services/email.service";
 import { asyncHandler } from "../utils/asyncHandler";
 import { signToken } from "../utils/jwt";
 
@@ -103,7 +103,14 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   if (!isSmtpConfigured()) {
-    throw new AppError("SMTP is not configured. Please contact administrator.", 500);
+    // eslint-disable-next-line no-console
+    console.warn("[SMTP] Password reset requested but SMTP is not configured.");
+    res.status(200).json({
+      success: true,
+      message: forgotPasswordMessage,
+      data: null
+    });
+    return;
   }
 
   const { email } = req.body as { email: string };
@@ -149,14 +156,39 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
     void (async () => {
       try {
         await sendPasswordResetEmail(user.email, resetUrl, user.name);
-        // eslint-disable-next-line no-console
-        console.log("[Email] Password reset email sent", { userId: user.id });
       } catch (emailError) {
         // eslint-disable-next-line no-console
-        console.error("[Email] Password reset email failed", emailError);
+        console.error("[SMTP] Password reset email failed", emailError instanceof Error ? emailError.message : emailError);
       }
     })();
   });
+});
+
+export const testSmtp = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body as { email: string };
+
+  if (!isSmtpConfigured()) {
+    res.status(503).json({
+      success: false,
+      message: "SMTP test email failed",
+      error: "SMTP is not configured."
+    });
+    return;
+  }
+
+  try {
+    await sendSmtpTestEmail(email);
+    res.status(200).json({
+      success: true,
+      message: "SMTP test email sent"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "SMTP test email failed",
+      error: error instanceof Error ? error.message : "Unknown SMTP error"
+    });
+  }
 });
 
 export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
