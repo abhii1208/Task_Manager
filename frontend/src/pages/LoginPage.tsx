@@ -65,6 +65,8 @@ export const LoginPage = () => {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
+      // eslint-disable-next-line no-console
+      console.log("Login target:", `${import.meta.env.VITE_API_BASE_URL}/auth/login`);
       await login(values);
       toast.success("Welcome back");
     } catch (error) {
@@ -90,6 +92,14 @@ export const LoginPage = () => {
         }
 
         if (error.request) {
+          if (
+            (typeof error.message === "string" && error.message.includes("CORS")) ||
+            error.message === "Network Error"
+          ) {
+            toast.error("Backend request blocked or unreachable. Check CORS and API URL.");
+            return;
+          }
+
           toast.error("Unable to reach backend. Check VITE_API_BASE_URL, Render health URL, and CORS.");
           return;
         }
@@ -104,7 +114,7 @@ export const LoginPage = () => {
       const googleOAuthUrl = getApiUrl("/auth/google");
       // eslint-disable-next-line no-console
       console.log("Google OAuth URL:", googleOAuthUrl);
-      window.location.assign(googleOAuthUrl);
+      window.location.href = googleOAuthUrl;
     } catch {
       toast.error("API URL is not configured.");
     }

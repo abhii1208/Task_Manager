@@ -21,6 +21,7 @@ initializePassport();
 
 const allowedOrigins = [
   env.CLIENT_URL,
+  "https://task-manager-ks8m.vercel.app",
   "https://task-manager-8rvp.vercel.app",
   ...env.CLIENT_URLS,
   "http://localhost:5173",
@@ -41,7 +42,7 @@ const corsOptions: CorsOptions = {
   credentials: true
 };
 
-app.options("*", cors());
+app.options("*", cors(corsOptions));
 app.use(
   cors(corsOptions)
 );
@@ -97,6 +98,10 @@ app.get("/api/health/db", async (_req: Request, res: Response) => {
 
 app.use("/api/auth", authRateLimiter, authRouter);
 app.use("/api/tasks", taskRouter);
+// eslint-disable-next-line no-console
+console.log("[Server] Auth routes mounted at /api/auth");
+// eslint-disable-next-line no-console
+console.log("[Server] Task routes mounted at /api/tasks");
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
