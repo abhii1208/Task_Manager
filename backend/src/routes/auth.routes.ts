@@ -33,7 +33,10 @@ const ensureGoogleOAuthEnabled = (_req: Request, res: Response, next: NextFuncti
   if (!isGoogleOAuthEnabled()) {
     // eslint-disable-next-line no-console
     console.error("[OAuth][Google] OAuth is disabled due to missing Google OAuth environment variables.");
-    oauthFailure(_req, res);
+    res.status(503).json({
+      success: false,
+      message: "Google OAuth is not configured."
+    });
     return;
   }
 

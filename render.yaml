@@ -4,6 +4,6 @@ services:
     runtime: node
     rootDir: backend
     plan: free
-    buildCommand: npm install --production=false && npm run build
+    buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
     healthCheckPath: /api/health

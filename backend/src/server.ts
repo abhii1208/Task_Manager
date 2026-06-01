@@ -85,24 +85,34 @@ const authRateLimiter = rateLimit({
 });
 
 app.get("/api/health", async (_req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "ok",
+    message: "TaskFlow Pro API is running",
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get("/api/health/db", async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
       success: true,
       status: "ok",
-      service: "TaskFlow Pro API",
-      message: "TaskFlow Pro API is running",
+      message: "Database connection is healthy",
       timestamp: new Date().toISOString(),
       database: "connected"
     });
-  } catch {
+  } catch (error) {
+    const errorName = error instanceof Error ? error.name : "UnknownError";
+
     res.status(503).json({
       success: false,
       status: "error",
-      service: "TaskFlow Pro API",
       timestamp: new Date().toISOString(),
       database: "disconnected",
-      message: "Database connectivity check failed"
+      message: "Database connectivity check failed",
+      error: errorName
     });
   }
 });
@@ -118,17 +128,29 @@ const startServer = async (): Promise<void> => {
     await prisma.$connect();
     await prisma.$queryRaw`SELECT 1`;
     // eslint-disable-next-line no-console
-    console.log("Database connected successfully.");
-
-    app.listen(env.PORT, () => {
-      // eslint-disable-next-line no-console
-      console.log(`Backend running on http://localhost:${env.PORT}`);
-    });
-  } catch {
+    console.log("[Database] Connected successfully");
+  } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("Failed to initialize database connection. Check environment configuration.");
+    console.error("[Database] Connection failed");
+
+    if (error instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.error("[Database] Error name:", error.name);
+      // eslint-disable-next-line no-console
+      console.error("[Database] Error message:", error.message);
+    }
+
+    // eslint-disable-next-line no-console
+    console.error("[Database] DATABASE_URL configured:", Boolean(process.env.DATABASE_URL));
+    // eslint-disable-next-line no-console
+    console.error("[Database] NODE_ENV:", process.env.NODE_ENV);
     process.exit(1);
   }
+
+  app.listen(env.PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`[Server] Running on port ${env.PORT}`);
+  });
 };
 
 void startServer();

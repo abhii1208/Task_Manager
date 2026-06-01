@@ -93,7 +93,7 @@ cd task-manager
 cd backend
 npm install
 npm run prisma:generate
-npm run prisma:migrate
+npm run prisma:migrate:dev
 npm run prisma:seed   # optional demo data
 npm run dev
 ```
@@ -109,11 +109,6 @@ npm run dev
 ### Backend (`backend/.env`)
 ```env
 DATABASE_URL=
-DB_HOST=
-DB_PORT=5432
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
 DB_SSL=true
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
@@ -156,9 +151,12 @@ Base URL: `http://localhost:5000/api`
 ### Health
 - `GET /api/health`
   - Success:
-    - `{ "success": true, "status": "ok", "service": "TaskFlow Pro API", "message": "TaskFlow Pro API is running", "timestamp": "2026-06-01T12:00:00.000Z", "database": "connected" }`
+    - `{ "success": true, "status": "ok", "message": "TaskFlow Pro API is running", "timestamp": "2026-06-01T12:00:00.000Z" }`
+- `GET /api/health/db`
+  - Success:
+    - `{ "success": true, "status": "ok", "message": "Database connection is healthy", "timestamp": "2026-06-01T12:00:00.000Z", "database": "connected" }`
   - Failure:
-    - `{ "success": false, "status": "error", "service": "TaskFlow Pro API", "timestamp": "2026-06-01T12:00:00.000Z", "database": "disconnected", "message": "Database connectivity check failed" }`
+    - `{ "success": false, "status": "error", "timestamp": "2026-06-01T12:00:00.000Z", "database": "disconnected", "message": "Database connectivity check failed", "error": "PrismaClientInitializationError" }`
 
 ### Tasks (all protected)
 - `GET /tasks`
@@ -200,7 +198,7 @@ Base URL: `http://localhost:5000/api`
 1. Create PostgreSQL instance.
 2. Create Web Service for `backend/`.
 3. Build command:
-   - `npm install --production=false && npm run build`
+   - `npm install && npx prisma generate && npm run build`
 4. Start command:
    - `npm run start`
 5. Add env vars:
@@ -225,6 +223,9 @@ Base URL: `http://localhost:5000/api`
    - `NODE_ENV=production`
 6. Run migrations in deploy shell or post-deploy command:
    - `npx prisma migrate deploy`
+7. Required database URL format for Supabase:
+   - `postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require`
+   - Optional for transaction pooler (`:6543`): append `&pgbouncer=true`
 
 ## Google OAuth Setup
 Google Cloud Console -> APIs & Services -> Credentials -> OAuth 2.0 Client ID:
@@ -252,12 +253,14 @@ Expected backend values on Render:
 BACKEND_URL=https://task-manager-6aq1.onrender.com
 GOOGLE_CALLBACK_URL=https://task-manager-6aq1.onrender.com/api/auth/google/callback
 CLIENT_URL=https://YOUR_FRONTEND_VERCEL_URL.vercel.app
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 ## Production Troubleshooting
 ### "Unable to reach backend. Please check deployment configuration."
 1. Verify backend health is reachable:
    - `https://task-manager-6aq1.onrender.com/api/health`
+   - `https://task-manager-6aq1.onrender.com/api/health/db`
 2. Verify frontend env in Vercel:
    - `VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api`
 3. Redeploy frontend after env updates (Vite envs are baked at build time).

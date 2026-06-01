@@ -53,30 +53,27 @@ const parseOptionalUrlList = (value?: string): string[] => {
     .filter((entry) => entry.length > 0);
 };
 
-const buildDatabaseUrlFromParts = (values: {
-  DB_HOST: string;
-  DB_PORT: number;
-  DB_NAME: string;
-  DB_USER: string;
-  DB_PASSWORD: string;
-  DB_SSL: boolean;
-}): string => {
-  const user = encodeURIComponent(values.DB_USER);
-  const password = encodeURIComponent(values.DB_PASSWORD);
-  const baseUrl = `postgresql://${user}:${password}@${values.DB_HOST}:${values.DB_PORT}/${values.DB_NAME}`;
-  return values.DB_SSL ? `${baseUrl}?sslmode=require` : baseUrl;
-};
-
-const applySslToConnectionString = (databaseUrl: string, shouldUseSsl: boolean): string => {
-  if (!shouldUseSsl) {
-    return databaseUrl;
-  }
-
+const normalizeDatabaseConnectionString = (databaseUrl: string, nodeEnv: string, shouldUseSsl: boolean): string => {
   try {
     const parsed = new URL(databaseUrl);
+    const isPostgresProtocol = parsed.protocol === "postgresql:" || parsed.protocol === "postgres:";
 
-    if (!parsed.searchParams.has("sslmode")) {
+    if (!isPostgresProtocol) {
+      return databaseUrl;
+    }
+
+    const isSupabaseHost = parsed.hostname.includes("supabase.com");
+    const shouldRequireSsl = shouldUseSsl || nodeEnv === "production" || isSupabaseHost;
+
+    if (shouldRequireSsl && !parsed.searchParams.has("sslmode")) {
       parsed.searchParams.set("sslmode", "require");
+    }
+
+    const isSupabasePooler = parsed.hostname.includes("pooler.supabase.com");
+    const isTransactionPoolerPort = parsed.port === "6543";
+
+    if (isSupabasePooler && isTransactionPoolerPort && !parsed.searchParams.has("pgbouncer")) {
+      parsed.searchParams.set("pgbouncer", "true");
     }
 
     return parsed.toString();
@@ -94,33 +91,13 @@ if (!parsedEnv.success) {
 
 const rawEnv = parsedEnv.data;
 const dbSsl = rawEnv.DB_SSL ?? false;
-const hasDatabaseParts =
-  Boolean(rawEnv.DB_HOST) &&
-  Boolean(rawEnv.DB_PORT) &&
-  Boolean(rawEnv.DB_NAME) &&
-  Boolean(rawEnv.DB_USER) &&
-  Boolean(rawEnv.DB_PASSWORD);
-
-let databaseUrl = rawEnv.DATABASE_URL;
-
-if (!databaseUrl && hasDatabaseParts) {
-  databaseUrl = buildDatabaseUrlFromParts({
-    DB_HOST: rawEnv.DB_HOST as string,
-    DB_PORT: rawEnv.DB_PORT as number,
-    DB_NAME: rawEnv.DB_NAME as string,
-    DB_USER: rawEnv.DB_USER as string,
-    DB_PASSWORD: rawEnv.DB_PASSWORD as string,
-    DB_SSL: dbSsl
-  });
-}
+const databaseUrl = sanitizeOptional(rawEnv.DATABASE_URL);
 
 if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL is required. Provide DATABASE_URL or provide DB_HOST, DB_PORT, DB_NAME, DB_USER, and DB_PASSWORD."
-  );
+  throw new Error("DATABASE_URL is required.");
 }
 
-const resolvedDatabaseUrl = applySslToConnectionString(databaseUrl, dbSsl);
+const resolvedDatabaseUrl = normalizeDatabaseConnectionString(databaseUrl, rawEnv.NODE_ENV, dbSsl);
 process.env.DATABASE_URL = resolvedDatabaseUrl;
 
 const googleClientId = sanitizeOptional(rawEnv.GOOGLE_CLIENT_ID);
