@@ -1,9 +1,11 @@
 import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import toast from "react-hot-toast";
 
 import { authService } from "../services/auth.service";
+import { clearAuthHeader, setAuthHeader } from "../services/api";
 import { LoginPayload, RegisterPayload, User } from "../types/auth";
-import { TOKEN_STORAGE_KEY } from "../utils/constants";
+import { clearToken, getToken, setToken } from "../utils/authToken";
 
 type AuthContextValue = {
   user: User | null;
@@ -20,25 +22,31 @@ type AuthContextValue = {
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_STORAGE_KEY));
+  const [token, setSessionToken] = useState<string | null>(() => getToken());
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const saveSession = useCallback((nextToken: string, nextUser: User): void => {
-    localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
     setToken(nextToken);
+    setAuthHeader(nextToken);
+    setSessionToken(nextToken);
     setUser(nextUser);
+    setIsAuthenticated(true);
   }, []);
 
   const clearSession = useCallback(() => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    setToken(null);
+    clearToken();
+    clearAuthHeader();
+    setSessionToken(null);
     setUser(null);
+    setIsAuthenticated(false);
   }, []);
 
   const refreshProfile = useCallback(async (): Promise<void> => {
     const profile = await authService.me();
     setUser(profile);
+    setIsAuthenticated(true);
   }, []);
 
   const login = useCallback(
@@ -59,13 +67,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const handleOAuthToken = useCallback(
     async (oauthToken: string) => {
-      localStorage.setItem(TOKEN_STORAGE_KEY, oauthToken);
+      setToken(oauthToken);
+      setAuthHeader(oauthToken);
 
       try {
         const profile = await authService.me();
         saveSession(oauthToken, profile);
       } catch (error) {
-        clearSession();
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          clearSession();
+        }
         throw error;
       }
     },
@@ -92,14 +103,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const hydrateUser = async (): Promise<void> => {
       if (!token) {
+        setUser(null);
+        setIsAuthenticated(false);
         setIsAuthLoading(false);
         return;
       }
 
+      setAuthHeader(token);
+
+      const hydrationTimeout = new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error("AUTH_CHECK_TIMEOUT")), 8000);
+      });
+
       try {
-        await refreshProfile();
-      } catch {
+        await Promise.race([refreshProfile(), hydrationTimeout]);
+      } catch (error) {
         clearSession();
+        if (error instanceof Error && error.message === "AUTH_CHECK_TIMEOUT") {
+          toast.error("Session check timed out. Please login again.");
+        }
       } finally {
         setIsAuthLoading(false);
       }
@@ -112,7 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       user,
       token,
-      isAuthenticated: Boolean(user && token),
+      isAuthenticated,
       isAuthLoading,
       login,
       register,
@@ -120,7 +142,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       logout,
       refreshProfile
     }),
-    [user, token, isAuthLoading, login, register, handleOAuthToken, logout, refreshProfile]
+    [user, token, isAuthenticated, isAuthLoading, login, register, handleOAuthToken, logout, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -5,7 +5,7 @@ import { Chrome } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 
 import { AuthCard } from "../components/auth/AuthCard";
@@ -26,6 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const {
@@ -69,6 +70,7 @@ export const LoginPage = () => {
       console.log("Login target:", `${import.meta.env.VITE_API_BASE_URL}/auth/login`);
       await login(values);
       toast.success("Welcome back");
+      navigate("/", { replace: true });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // eslint-disable-next-line no-console

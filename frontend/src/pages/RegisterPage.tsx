@@ -4,6 +4,7 @@ import { Chrome } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { AuthCard } from "../components/auth/AuthCard";
@@ -28,6 +29,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const RegisterPage = () => {
   const { register: registerUser } = useAuth();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -59,6 +61,7 @@ export const RegisterPage = () => {
         password: values.password
       });
       toast.success("Account created");
+      navigate("/", { replace: true });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Registration failed");
     }

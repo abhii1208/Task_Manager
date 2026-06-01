@@ -1,27 +1,7 @@
 import axios from "axios";
 
 import { API_BASE_URL } from "../config/env";
-import { TOKEN_STORAGE_KEY } from "../utils/constants";
-
-const TOKEN_STORAGE_KEYS = ["taskflow_token", "token", TOKEN_STORAGE_KEY] as const;
-
-const getStoredToken = (): string | null => {
-  for (const key of TOKEN_STORAGE_KEYS) {
-    const value = localStorage.getItem(key);
-
-    if (value) {
-      return value;
-    }
-  }
-
-  return null;
-};
-
-const clearStoredTokens = (): void => {
-  for (const key of TOKEN_STORAGE_KEYS) {
-    localStorage.removeItem(key);
-  }
-};
+import { clearToken, getToken } from "../utils/authToken";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -30,6 +10,14 @@ export const api = axios.create({
   }
 });
 
+export const setAuthHeader = (token: string): void => {
+  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+};
+
+export const clearAuthHeader = (): void => {
+  delete api.defaults.headers.common.Authorization;
+};
+
 api.interceptors.request.use((config) => {
   if (!API_BASE_URL) {
     return Promise.reject(
@@ -37,7 +25,7 @@ api.interceptors.request.use((config) => {
     );
   }
 
-  const token = getStoredToken();
+  const token = getToken();
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -50,7 +38,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
-      clearStoredTokens();
+      clearToken();
+      clearAuthHeader();
       window.dispatchEvent(new Event("auth:session-expired"));
     }
 

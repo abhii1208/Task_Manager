@@ -1,7 +1,5 @@
 import { TaskPriority, TaskSortBy, TaskStage } from "../types/task";
 
-export const TOKEN_STORAGE_KEY = "tm_token";
-
 export const STAGES = ["TODO", "IN_PROGRESS", "DONE"] as const;
 export const PRIORITIES = ["LOW", "MEDIUM", "HIGH"] as const;
 

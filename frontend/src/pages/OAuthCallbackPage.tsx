@@ -44,7 +44,7 @@ export const OAuthCallbackPage = () => {
         navigate("/", { replace: true });
       } catch {
         sessionStorage.removeItem(OAUTH_TOKEN_CACHE_KEY);
-        const message = "OAuth login failed. Please try again.";
+        const message = "Login succeeded, but profile loading failed. Please try again.";
         setError(message);
         toast.error(message);
       }
@@ -58,7 +58,7 @@ export const OAuthCallbackPage = () => {
       <div className="w-full max-w-md rounded-2xl border border-violet-border bg-white px-6 py-6 text-center shadow-sm">
         {error ? (
           <>
-            <p className="text-base font-semibold text-danger">OAuth login failed. Please try again.</p>
+            <p className="text-base font-semibold text-danger">{error}</p>
             <Link
               to="/login"
               replace

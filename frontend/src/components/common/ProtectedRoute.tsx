@@ -1,14 +1,14 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
-import { PageLoader } from "./PageLoader";
+import { FullPageLoader } from "./FullPageLoader";
 
 export const ProtectedRoute = () => {
   const { isAuthenticated, isAuthLoading } = useAuth();
   const location = useLocation();
 
   if (isAuthLoading) {
-    return <PageLoader label="Loading your workspace..." />;
+    return <FullPageLoader message="Preparing your workspace..." />;
   }
 
   if (!isAuthenticated) {

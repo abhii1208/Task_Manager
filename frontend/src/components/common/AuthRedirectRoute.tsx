@@ -1,13 +1,13 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
-import { PageLoader } from "./PageLoader";
+import { FullPageLoader } from "./FullPageLoader";
 
 export const AuthRedirectRoute = () => {
   const { isAuthenticated, isAuthLoading } = useAuth();
 
   if (isAuthLoading) {
-    return <PageLoader label="Checking session..." />;
+    return <FullPageLoader message="Checking session..." />;
   }
 
   if (isAuthenticated) {
