@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 import { authService } from "../services/auth.service";
 import { clearApiAuthToken, setApiAuthToken } from "../services/api";
@@ -68,15 +69,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsBooting(false);
       return profile;
     } catch (error) {
+      clearSession();
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        clearSession();
+        toast.error("Please login again.");
         return undefined;
       }
 
-      setAuthError("Unable to verify session. Please retry.");
-      setIsAuthenticated(false);
-      setIsBooting(false);
-      throw error;
+      toast.error("Please login again.");
+      return undefined;
     }
   }, [clearSession]);
 

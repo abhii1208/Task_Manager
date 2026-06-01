@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Chrome } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -13,7 +12,6 @@ import { AuthToggle } from "../components/auth/AuthToggle";
 import { FormInput } from "../components/auth/FormInput";
 import { PasswordInput } from "../components/auth/PasswordInput";
 import { Button } from "../components/ui/Button";
-import { getApiUrl } from "../config/env";
 import { useAuth } from "../hooks/useAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { LOGIN_REFRESH_FLAG, OAUTH_REFRESH_FLAG } from "../utils/authRefreshFlags";
@@ -117,15 +115,6 @@ export const LoginPage = () => {
     }
   });
 
-  const handleGoogleLogin = (): void => {
-    try {
-      const googleOAuthUrl = getApiUrl("/auth/google");
-      window.open(googleOAuthUrl, "_self");
-    } catch {
-      toast.error("API URL is not configured.");
-    }
-  };
-
   return (
     <AuthLayout title="Welcome back" subtitle="Enter your credentials to access your workspace.">
       <AuthCard>
@@ -169,17 +158,6 @@ export const LoginPage = () => {
             Continue to Workspace
           </Button>
         </motion.form>
-
-        <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.08em] text-text-muted">
-          <div className="h-px flex-1 bg-violet-border" />
-          Or continue with
-          <div className="h-px flex-1 bg-violet-border" />
-        </div>
-
-        <Button type="button" variant="primary" className="w-full gap-2" onClick={handleGoogleLogin}>
-          <Chrome size={16} />
-          Continue with Google
-        </Button>
       </AuthCard>
     </AuthLayout>
   );

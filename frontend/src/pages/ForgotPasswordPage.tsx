@@ -18,6 +18,7 @@ const forgotPasswordSchema = z.object({
 });
 
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+const forgotPasswordSuccessMessage = "If an account exists with this email, a reset link has been sent.";
 
 export const ForgotPasswordPage = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -38,8 +39,9 @@ export const ForgotPasswordPage = () => {
       const message = await authService.forgotPassword(values.email);
       setSuccessMessage(message);
       toast.success(message);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to send reset email");
+    } catch {
+      setSuccessMessage(forgotPasswordSuccessMessage);
+      toast.success(forgotPasswordSuccessMessage);
     }
   });
 

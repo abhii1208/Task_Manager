@@ -148,19 +148,23 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   });
 
   const resetUrl = `${env.CLIENT_URL}/#/reset-password?token=${rawToken}`;
-  try {
-    await sendPasswordResetEmail(user.email, resetUrl, user.name);
-    // eslint-disable-next-line no-console
-    console.log("[ForgotPassword] Reset email sent");
-  } catch (emailError) {
-    // eslint-disable-next-line no-console
-    console.error("[ForgotPassword] SMTP failed", emailError instanceof Error ? emailError.message : emailError);
-  }
-
   res.status(200).json({
     success: true,
     message: forgotPasswordMessage,
     data: null
+  });
+
+  setImmediate(() => {
+    void (async () => {
+      try {
+        await sendPasswordResetEmail(user.email, resetUrl, user.name);
+        // eslint-disable-next-line no-console
+        console.log("[ForgotPassword] Reset email sent");
+      } catch (emailError) {
+        // eslint-disable-next-line no-console
+        console.error("[ForgotPassword] SMTP failed", emailError instanceof Error ? emailError.message : emailError);
+      }
+    })();
   });
 });
 

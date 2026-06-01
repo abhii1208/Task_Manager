@@ -13,7 +13,7 @@ import {
   X
 } from "lucide-react";
 import { ChangeEvent, ReactNode, useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { Button } from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
@@ -140,7 +140,14 @@ export const AppLayout = ({
   hideSearch = false
 }: AppLayoutProps) => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = (): void => {
+    logout();
+    setSidebarOpen(false);
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-page-bg text-text-main lg:pl-[260px]">
@@ -172,7 +179,7 @@ export const AppLayout = ({
           onNavigate={() => setSidebarOpen(false)}
           onCreateTask={onCreateTask}
           createButtonLabel={createButtonLabel}
-          onLogout={logout}
+          onLogout={handleLogout}
         />
       </aside>
 

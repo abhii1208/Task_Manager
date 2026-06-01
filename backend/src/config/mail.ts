@@ -31,9 +31,9 @@ export const createMailTransporter = (): Transporter => {
       user: env.SMTP_USER,
       pass: env.SMTP_PASS
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 7000
   });
 
   return transporterInstance;
