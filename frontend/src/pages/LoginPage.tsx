@@ -16,6 +16,7 @@ import { Button } from "../components/ui/Button";
 import { getApiUrl } from "../config/env";
 import { useAuth } from "../hooks/useAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
+import { LOGIN_REFRESH_FLAG } from "../utils/authRefreshFlags";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -48,6 +49,7 @@ export const LoginPage = () => {
   useEffect(() => {
     reset({ email: "", password: "" });
     clearErrors();
+    sessionStorage.removeItem(LOGIN_REFRESH_FLAG);
   }, [reset, clearErrors]);
 
   useEffect(() => {
@@ -83,6 +85,14 @@ export const LoginPage = () => {
           navigate("/dashboard", { replace: true });
         }
       }, 300);
+
+      if (!sessionStorage.getItem(LOGIN_REFRESH_FLAG)) {
+        sessionStorage.setItem(LOGIN_REFRESH_FLAG, "true");
+        toast("Opening your workspace...");
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 250);
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // eslint-disable-next-line no-console

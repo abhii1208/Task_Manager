@@ -6,6 +6,7 @@ import { FullPageLoader } from "../components/ui/FullPageLoader";
 import { useAuth } from "../hooks/useAuth";
 import { authService } from "../services/auth.service";
 import { setApiAuthToken } from "../services/api";
+import { OAUTH_REFRESH_FLAG } from "../utils/authRefreshFlags";
 import { authToken } from "../utils/authToken";
 
 export const OAuthCallbackPage = () => {
@@ -39,6 +40,14 @@ export const OAuthCallbackPage = () => {
         const profile = await authService.me();
         applySession(token, profile);
         navigate("/dashboard", { replace: true });
+
+        if (!sessionStorage.getItem(OAUTH_REFRESH_FLAG)) {
+          sessionStorage.setItem(OAUTH_REFRESH_FLAG, "true");
+          toast("Opening your workspace...");
+          window.setTimeout(() => {
+            window.location.reload();
+          }, 250);
+        }
       } catch {
         const message = "Login succeeded, but profile loading failed. Please try again.";
         setError(message);
