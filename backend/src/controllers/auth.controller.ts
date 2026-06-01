@@ -22,7 +22,7 @@ const userSelect = {
   updatedAt: true
 };
 
-const oauthErrorRedirectUrl = `${env.CLIENT_URL}/login?oauthError=google`;
+const oauthErrorRedirectUrl = `${env.CLIENT_URL}/#/login?oauthError=google`;
 const forgotPasswordMessage = "If an account exists with this email, a reset link has been sent.";
 
 const createResetToken = (): { rawToken: string; tokenHash: string; expiresAt: Date } => {
@@ -137,7 +137,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
     }
   });
 
-  const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
+  const resetUrl = `${env.CLIENT_URL}/#/reset-password?token=${rawToken}`;
 
   res.status(200).json({
     success: true,

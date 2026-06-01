@@ -1,6 +1,6 @@
 import { AnimatePresence } from "framer-motion";
 import { Suspense } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AuthRedirectRoute } from "./components/common/AuthRedirectRoute";
 import { FullPageLoader } from "./components/common/FullPageLoader";
@@ -49,11 +49,11 @@ const AnimatedRoutes = () => {
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Suspense fallback={<FullPageLoader message="Loading workspace..." />}>
         <AnimatedRoutes />
       </Suspense>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 

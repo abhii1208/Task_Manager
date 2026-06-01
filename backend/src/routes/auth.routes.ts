@@ -11,7 +11,7 @@ import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema 
 import { signToken } from "../utils/jwt";
 
 const authRouter = Router();
-const oauthFailurePath = `${env.CLIENT_URL}/login?oauthError=google`;
+const oauthFailurePath = `${env.CLIENT_URL}/#/login?oauthError=google`;
 
 const logOAuth = (message: string, details?: Record<string, unknown>): void => {
   // eslint-disable-next-line no-console
@@ -96,14 +96,13 @@ authRouter.get(
 
           logOAuth("JWT generated", { userId: oauthUser.id });
 
-          const redirectUrl = new URL("/oauth/callback", env.CLIENT_URL);
-          redirectUrl.searchParams.set("token", token);
+          const redirectUrl = `${env.CLIENT_URL}/#/oauth/callback?token=${encodeURIComponent(token)}`;
 
           logOAuth("Redirecting to frontend callback", {
-            redirectPath: redirectUrl.origin + redirectUrl.pathname
+            redirectPath: `${env.CLIENT_URL}/#/oauth/callback`
           });
 
-          res.redirect(redirectUrl.toString());
+          res.redirect(redirectUrl);
         } catch (callbackError) {
           // eslint-disable-next-line no-console
           console.error("[OAuth][Google] JWT redirect failed", callbackError);
