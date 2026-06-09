@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -61,6 +62,17 @@ export const RegisterPage = () => {
       toast.success("Account created");
       navigate("/dashboard", { replace: true });
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          toast.error("Email is already in use. Please login instead.");
+          return;
+        }
+
+        const responseMessage = error.response?.data?.message as string | undefined;
+        toast.error(responseMessage ?? "Registration failed");
+        return;
+      }
+
       toast.error(error instanceof Error ? error.message : "Registration failed");
     }
   });
