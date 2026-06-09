@@ -228,7 +228,10 @@ Base URL: `http://localhost:5000/api`
 6. Run migrations in deploy shell or post-deploy command:
    - `npx prisma migrate deploy`
 7. Required database URL format for Supabase:
-   - `postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require`
+   - Copy the **Session pooler** connection string from Supabase Connect for Prisma on Render.
+   - Format: `postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-X-REGION.pooler.supabase.com:5432/postgres?sslmode=require`
+   - The `YOUR_PROJECT_REF` and `aws-X-REGION.pooler.supabase.com` host must match the exact URL Supabase gives you.
+   - URL-encode special characters in the password if you paste the URL manually.
    - Optional for transaction pooler (`:6543`): append `&pgbouncer=true`
 
 ## Google OAuth Setup
@@ -281,6 +284,13 @@ This means the frontend was built with the backend root URL instead of the API b
 VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api
 ```
 Then redeploy the frontend. The backend includes compatibility routes for `/auth/*` and `/tasks/*`, but `/api/*` remains the canonical API path.
+
+### "FATAL: (ENOTFOUND) tenant/user ... not found"
+This is a Supabase pooler credential/tenant mismatch, not an Express or Prisma schema problem. Fix `DATABASE_URL` in Render and local `.env` by copying the Session pooler URL again from Supabase:
+```env
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-X-REGION.pooler.supabase.com:5432/postgres?sslmode=require
+```
+Check that the project is active, the username contains the exact project ref after `postgres.`, the pooler region/host matches the copied Supabase URL, and any special characters in the password are URL-encoded. After changing Render env vars, redeploy the backend and rerun migrations if needed.
 
 ### "Error 400: redirect_uri_mismatch"
 1. Confirm Google authorized redirect URI includes:

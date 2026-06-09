@@ -136,6 +136,31 @@ const normalizeDatabaseConnectionString = (databaseUrl: string, nodeEnv: string,
   }
 };
 
+export const getDatabaseConnectionSummary = (databaseUrl: string): Record<string, string | number | boolean | undefined> => {
+  try {
+    const parsed = new URL(databaseUrl);
+    const username = decodeURIComponent(parsed.username);
+    const projectRefMatch = username.match(/^[^.]+\.([a-z0-9]{20})$/i);
+
+    return {
+      protocol: parsed.protocol.replace(":", ""),
+      username,
+      host: parsed.hostname,
+      port: parsed.port ? Number(parsed.port) : undefined,
+      database: parsed.pathname.replace(/^\//, ""),
+      sslmode: parsed.searchParams.get("sslmode") ?? undefined,
+      pgbouncer: parsed.searchParams.get("pgbouncer") ?? undefined,
+      isSupabasePooler: parsed.hostname.includes("pooler.supabase.com"),
+      isSupabaseDirect: parsed.hostname.startsWith("db.") && parsed.hostname.endsWith(".supabase.co"),
+      projectRef: projectRefMatch?.[1]
+    };
+  } catch {
+    return {
+      parseable: false
+    };
+  }
+};
+
 const parsedEnv = envSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {

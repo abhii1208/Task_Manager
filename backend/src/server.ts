@@ -7,7 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 
-import { env } from "./config/env";
+import { env, getDatabaseConnectionSummary } from "./config/env";
 import { initializePassport } from "./config/passport";
 import { prisma } from "./config/prisma";
 import { errorMiddleware, notFoundMiddleware } from "./middleware/error.middleware";
@@ -163,6 +163,17 @@ const logInitialDatabaseConnection = async (): Promise<void> => {
       console.error("[Database] Error name:", error.name);
       // eslint-disable-next-line no-console
       console.error("[Database] Error message:", error.message);
+
+      const connectionSummary = getDatabaseConnectionSummary(env.DATABASE_URL);
+      // eslint-disable-next-line no-console
+      console.error("[Database] Connection target:", JSON.stringify(connectionSummary));
+
+      if (error.message.includes("tenant/user") && connectionSummary.isSupabasePooler) {
+        // eslint-disable-next-line no-console
+        console.error(
+          "[Database] Supabase pooler rejected the tenant/user. Re-copy the Session pooler connection string from Supabase, confirm the project is active, the host region matches the project, the username includes the exact project ref, and the password is URL-encoded."
+        );
+      }
     }
 
     // eslint-disable-next-line no-console
