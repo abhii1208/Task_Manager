@@ -134,10 +134,16 @@ app.get("/api/health/db", async (_req: Request, res: Response) => {
 
 app.use("/api/auth", authRateLimiter, authRouter);
 app.use("/api/tasks", taskRouter);
+app.use("/auth", authRateLimiter, authRouter);
+app.use("/tasks", taskRouter);
 // eslint-disable-next-line no-console
 console.log("[Server] Auth routes mounted at /api/auth");
 // eslint-disable-next-line no-console
 console.log("[Server] Task routes mounted at /api/tasks");
+// eslint-disable-next-line no-console
+console.log("[Server] Compatibility auth routes mounted at /auth");
+// eslint-disable-next-line no-console
+console.log("[Server] Compatibility task routes mounted at /tasks");
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

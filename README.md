@@ -191,7 +191,8 @@ Base URL: `http://localhost:5000/api`
 1. Import `frontend/` into Vercel.
 2. Set env var exactly (Production + Preview) and redeploy:
    - `VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api`
-   - Important: the value must include `/api` and must not be localhost.
+   - Recommended: include `/api`. If omitted, the frontend normalizes the backend root URL to `/api`.
+   - Important: the value must not be localhost in production.
    - Important: Vite env vars are baked at build time, so redeploy the frontend after changing this value.
 3. Build command: `npm run build`
 4. Output directory: `dist`
@@ -273,6 +274,13 @@ DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-no
 5. Redeploy backend after env updates.
 
 The backend also accepts HTTPS `*.vercel.app` origins for deployed Vercel frontends and previews. Keep `CLIENT_URL` set to the canonical production frontend so OAuth and password reset links redirect to the right app.
+
+### "Route not found: POST /auth/login"
+This means the frontend was built with the backend root URL instead of the API base path. Set or correct:
+```env
+VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api
+```
+Then redeploy the frontend. The backend includes compatibility routes for `/auth/*` and `/tasks/*`, but `/api/*` remains the canonical API path.
 
 ### "Error 400: redirect_uri_mismatch"
 1. Confirm Google authorized redirect URI includes:
