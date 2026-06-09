@@ -14,6 +14,7 @@ import { PasswordInput } from "../components/auth/PasswordInput";
 import { Button } from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
+import { LOGIN_REFRESH_FLAG, OAUTH_REFRESH_FLAG, REGISTER_REFRESH_FLAG } from "../utils/authRefreshFlags";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
@@ -50,6 +51,9 @@ export const RegisterPage = () => {
   useEffect(() => {
     reset({ name: "", email: "", password: "" });
     clearErrors();
+    sessionStorage.removeItem(LOGIN_REFRESH_FLAG);
+    sessionStorage.removeItem(OAUTH_REFRESH_FLAG);
+    sessionStorage.removeItem(REGISTER_REFRESH_FLAG);
   }, [clearErrors, reset]);
 
   const onSubmit = handleSubmit(async (values) => {
@@ -61,6 +65,20 @@ export const RegisterPage = () => {
       });
       toast.success("Account created");
       navigate("/dashboard", { replace: true });
+
+      window.setTimeout(() => {
+        if (!window.location.hash.includes("/dashboard")) {
+          navigate("/dashboard", { replace: true });
+        }
+      }, 300);
+
+      if (!sessionStorage.getItem(REGISTER_REFRESH_FLAG)) {
+        sessionStorage.setItem(REGISTER_REFRESH_FLAG, "true");
+        toast("Opening your workspace...");
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 250);
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 409) {

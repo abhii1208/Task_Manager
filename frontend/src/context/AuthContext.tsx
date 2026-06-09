@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { authService } from "../services/auth.service";
 import { clearApiAuthToken, setApiAuthToken } from "../services/api";
 import { LoginPayload, RegisterPayload, User } from "../types/auth";
-import { LOGIN_REFRESH_FLAG, OAUTH_REFRESH_FLAG } from "../utils/authRefreshFlags";
+import { LOGIN_REFRESH_FLAG, OAUTH_REFRESH_FLAG, REGISTER_REFRESH_FLAG } from "../utils/authRefreshFlags";
 import { authToken } from "../utils/authToken";
 
 type AuthContextValue = {
@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     authToken.clear();
     sessionStorage.removeItem(LOGIN_REFRESH_FLAG);
     sessionStorage.removeItem(OAUTH_REFRESH_FLAG);
+    sessionStorage.removeItem(REGISTER_REFRESH_FLAG);
     clearApiAuthToken();
     setUser(null);
     setIsAuthenticated(false);

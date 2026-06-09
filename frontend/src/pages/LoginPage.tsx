@@ -14,7 +14,7 @@ import { PasswordInput } from "../components/auth/PasswordInput";
 import { Button } from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
-import { LOGIN_REFRESH_FLAG, OAUTH_REFRESH_FLAG } from "../utils/authRefreshFlags";
+import { LOGIN_REFRESH_FLAG, OAUTH_REFRESH_FLAG, REGISTER_REFRESH_FLAG } from "../utils/authRefreshFlags";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -49,6 +49,7 @@ export const LoginPage = () => {
     clearErrors();
     sessionStorage.removeItem(LOGIN_REFRESH_FLAG);
     sessionStorage.removeItem(OAUTH_REFRESH_FLAG);
+    sessionStorage.removeItem(REGISTER_REFRESH_FLAG);
   }, [reset, clearErrors]);
 
   useEffect(() => {
