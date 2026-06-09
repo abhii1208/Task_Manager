@@ -1,12 +1,10 @@
 import axios from "axios";
 
+import { API_BASE_URL } from "../config/env";
 import { authToken } from "../utils/authToken";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 if (!API_BASE_URL) {
-  // eslint-disable-next-line no-console
-  console.error("VITE_API_BASE_URL is missing");
+  throw new Error("VITE_API_BASE_URL is missing. Set it to your backend URL ending in /api and redeploy the frontend.");
 }
 
 export const api = axios.create({

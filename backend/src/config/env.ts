@@ -103,7 +103,7 @@ const parseOptionalUrlList = (value?: string): string[] => {
 
   return trimmed
     .split(",")
-    .map((entry) => entry.trim())
+    .map((entry) => stripWrappingQuotes(entry.trim()).replace(/\/+$/, ""))
     .filter((entry) => entry.length > 0);
 };
 
@@ -168,6 +168,8 @@ const googleCallbackUrl = rawEnv.GOOGLE_CALLBACK_URL ?? `${rawEnv.BACKEND_URL}/a
 
 export const env = {
   ...rawEnv,
+  BACKEND_URL: rawEnv.BACKEND_URL.replace(/\/+$/, ""),
+  CLIENT_URL: rawEnv.CLIENT_URL.replace(/\/+$/, ""),
   DATABASE_URL: resolvedDatabaseUrl,
   DB_SSL: dbSsl,
   GOOGLE_CLIENT_ID: googleClientId,

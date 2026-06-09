@@ -192,6 +192,7 @@ Base URL: `http://localhost:5000/api`
 2. Set env var exactly (Production + Preview) and redeploy:
    - `VITE_API_BASE_URL=https://task-manager-6aq1.onrender.com/api`
    - Important: the value must include `/api` and must not be localhost.
+   - Important: Vite env vars are baked at build time, so redeploy the frontend after changing this value.
 3. Build command: `npm run build`
 4. Output directory: `dist`
 
@@ -259,7 +260,7 @@ DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-no
 ```
 
 ## Production Troubleshooting
-### "Unable to reach backend. Please check deployment configuration."
+### "Backend request blocked or unreachable. Check CORS and API URL."
 1. Verify backend health is reachable:
    - `https://task-manager-6aq1.onrender.com/api/health`
    - `https://task-manager-6aq1.onrender.com/api/health/db`
@@ -268,6 +269,10 @@ DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-ap-no
 3. Redeploy frontend after env updates (Vite envs are baked at build time).
 4. Verify backend CORS env:
    - `CLIENT_URL=https://YOUR_FRONTEND_VERCEL_URL.vercel.app`
+   - `CLIENT_URLS=https://YOUR_PREVIEW_URL.vercel.app,https://ANOTHER_FRONTEND_URL.vercel.app`
+5. Redeploy backend after env updates.
+
+The backend also accepts HTTPS `*.vercel.app` origins for deployed Vercel frontends and previews. Keep `CLIENT_URL` set to the canonical production frontend so OAuth and password reset links redirect to the right app.
 
 ### "Error 400: redirect_uri_mismatch"
 1. Confirm Google authorized redirect URI includes:

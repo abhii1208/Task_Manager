@@ -19,17 +19,38 @@ const app = express();
 app.set("trust proxy", 1);
 initializePassport();
 
-const allowedOrigins = [
+const defaultAllowedOrigins = [
   env.CLIENT_URL,
   "https://task-manager-ks8m.vercel.app",
   "https://task-manager-8rvp.vercel.app",
-  ...env.CLIENT_URLS,
   "http://localhost:5173",
   "http://localhost:3000"
 ].filter(Boolean) as string[];
 
+const allowedOrigins = new Set([...defaultAllowedOrigins, ...env.CLIENT_URLS].map((origin) => origin.replace(/\/+$/, "")));
+
+const isAllowedVercelOrigin = (origin: string): boolean => {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === "https:" && hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+};
+
+const isCorsOriginAllowed = (origin?: string): boolean => {
+  if (!origin) {
+    return true;
+  }
+
+  const normalizedOrigin = origin.replace(/\/+$/, "");
+  return allowedOrigins.has(normalizedOrigin) || isAllowedVercelOrigin(normalizedOrigin);
+};
+
 // eslint-disable-next-line no-console
 console.log("[Env] CLIENT_URL configured:", Boolean(env.CLIENT_URL));
+// eslint-disable-next-line no-console
+console.log("[Env] CLIENT_URLS configured:", env.CLIENT_URLS.length);
 // eslint-disable-next-line no-console
 console.log("[Env] DATABASE_URL configured:", Boolean(env.DATABASE_URL));
 // eslint-disable-next-line no-console
@@ -45,7 +66,7 @@ console.log(
 
 const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isCorsOriginAllowed(origin)) {
       callback(null, true);
       return;
     }
